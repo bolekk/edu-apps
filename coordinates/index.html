@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coordinate Plane Inequalities</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <canvas id="grid"></canvas>
+
+    <div id="ui-container">
+        <header>
+            <h1>Inequalities</h1>
+            <hr>
+            <div class="button-group">
+                <button id="add-x-btn" class="text-btn" aria-label="Add X Inequality">X</button>
+                <button id="add-y-btn" class="text-btn" aria-label="Add Y Inequality">Y</button>
+                <button id="add-linear-btn" class="text-btn" aria-label="Add Linear Inequality">Y=aX+b</button>
+                <button id="add-point-btn" class="text-btn" aria-label="Add Point">Point</button>
+            </div>
+            <div class="settings-row">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="show-grid-checkbox" checked>
+                    Show Grid
+                </label>
+            </div>
+        </header>
+        <div id="inequalities-list">
+            <!-- Inequality items will be added here -->
+        </div>
+        <div class="empty-state" id="empty-state">
+            No items added yet.
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

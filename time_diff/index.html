@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Travel Kids</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>⏰ Time Travel Challenge ⏰</h1>
+            <p>How many minutes passed?</p>
+        </header>
+
+        <div class="mode-selection">
+            <h2>Select Difficulty</h2>
+            <div class="buttons">
+                <button class="mode-btn" data-mode="easy">Easy</button>
+                <button class="mode-btn" data-mode="medium">Medium</button>
+                <button class="mode-btn" data-mode="hard">Hard</button>
+                <button class="mode-btn" data-mode="very-hard">Very Hard</button>
+            </div>
+        </div>
+
+        <div class="game-area hidden">
+            <div class="score-board">
+                <div class="score correct">✅ Correct: <span id="correct-count">0</span></div>
+                <div class="score incorrect">❌ Incorrect: <span id="incorrect-count">0</span></div>
+            </div>
+
+            <div class="question-card">
+                <div class="time-display">
+                    <div class="time-box">
+                        <span class="label">Start Time</span>
+                        <span class="time" id="start-time">--:--</span>
+                    </div>
+                    <div class="arrow">➡️</div>
+                    <div class="time-box">
+                        <span class="label">End Time</span>
+                        <span class="time" id="end-time">--:--</span>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <input type="number" id="answer-input" placeholder="?" min="0">
+                    <span class="unit">minutes</span>
+                </div>
+
+                <button id="check-btn">Check Answer!</button>
+                <div id="feedback" class="feedback"></div>
+                <button id="next-btn" class="hidden">Next Question ➡️</button>
+            </div>
+
+            <button id="back-btn">⬅️ Change Difficulty</button>
+        </div>
+
+        <!-- Overlays -->
+        <div id="win-overlay" class="overlay hidden">
+            <div class="overlay-content">
+                <h2>🎉 YOU WON! 🎉</h2>
+                <img src="assets/smiling_cat.png" alt="Happy Cat">
+                <p>Amazing job! You are a Time Master!</p>
+                <button id="play-again-win-btn" class="restart-btn">Play Again 🔄</button>
+            </div>
+            <div class="fireworks"></div>
+        </div>
+
+        <div id="lose-overlay" class="overlay hidden">
+            <div class="overlay-content">
+                <h2>Game Over</h2>
+                <img src="assets/sad_panda.png" alt="Sad Panda">
+                <p>Don't give up! Try again!</p>
+                <button id="play-again-lose-btn" class="restart-btn">Try Again 🔄</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

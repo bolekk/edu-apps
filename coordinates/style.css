@@ -1,0 +1,248 @@
+:root {
+    --bg-color: #0f172a;
+    --panel-bg: rgba(30, 41, 59, 0.7);
+    --panel-border: rgba(255, 255, 255, 0.1);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --danger: #ef4444;
+    --font-family: 'Inter', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--bg-color);
+    font-family: var(--font-family);
+    color: var(--text-primary);
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+#ui-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 360px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: calc(100vh - 40px);
+}
+
+header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+header hr {
+    border: none;
+    height: 1px;
+    background-color: var(--panel-border);
+    width: 100%;
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    padding-top: 4px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+}
+
+.text-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    color: white;
+    font-weight: 600;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 14px;
+}
+
+.text-btn:hover {
+    background: var(--accent-hover);
+}
+
+.icon-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.icon-btn:hover {
+    background: var(--accent-hover);
+}
+
+.icon-btn.danger {
+    background: transparent;
+    color: var(--text-secondary);
+}
+
+.icon-btn.danger:hover {
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+#inequalities-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+}
+
+.inequality-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.inequality-item:hover {
+    border-color: var(--panel-border);
+}
+
+.color-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.axis-label {
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 16px;
+    padding: 0 8px;
+}
+
+.select-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+select {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    font-size: 14px;
+    padding-right: 16px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+select:focus {
+    outline: none;
+}
+
+.number-input {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: var(--accent);
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 600;
+    width: 50px;
+    padding: 4px;
+    text-align: right;
+}
+
+.number-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Remove spinner buttons for number input */
+.number-input::-webkit-inner-spin-button,
+.number-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 20px 0;
+    font-style: italic;
+}
+
+/* Scrollbar styling */
+#inequalities-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+#inequalities-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#inequalities-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
