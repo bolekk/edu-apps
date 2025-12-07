@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edu Apps Portal</title>
+    <title>Educational Apps For Kids</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
@@ -77,9 +78,20 @@
             animation: fadeInUp 0.8s ease-out backwards;
         }
 
-        .card:nth-child(1) { animation-delay: 0.1s; border-top: 4px solid #f43f5e; }
-        .card:nth-child(2) { animation-delay: 0.2s; border-top: 4px solid #10b981; }
-        .card:nth-child(3) { animation-delay: 0.3s; border-top: 4px solid #3b82f6; }
+        .card:nth-child(1) {
+            animation-delay: 0.1s;
+            border-top: 4px solid #f43f5e;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.2s;
+            border-top: 4px solid #10b981;
+        }
+
+        .card:nth-child(3) {
+            animation-delay: 0.3s;
+            border-top: 4px solid #3b82f6;
+        }
 
         .card:hover {
             transform: translateY(-8px);
@@ -123,22 +135,42 @@
         }
 
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Responsive adjustments */
         @media (max-width: 600px) {
-            h1 { font-size: 2.5rem; }
-            .grid { grid-template-columns: 1fr; }
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <header>
@@ -149,7 +181,8 @@
     <div class="grid">
         <a href="./coordinates/index.html" class="card">
             <h2>Coordinates</h2>
-            <p>Master the Cartesian plane with this interactive tool. Draw inequalities, visualize regions, and understand linear equations.</p>
+            <p>Master the Cartesian plane with this interactive tool. Draw inequalities, visualize regions, and
+                understand linear equations.</p>
             <div class="card-footer">
                 Launch App <span class="arrow">→</span>
             </div>
@@ -165,7 +198,8 @@
 
         <a href="./time-diff/index.html" class="card">
             <h2>Time Difference</h2>
-            <p>Learn to calculate the difference between two timestamps. Test your skills across varying difficulty levels.</p>
+            <p>Learn to calculate the difference between two timestamps. Test your skills across varying difficulty
+                levels.</p>
             <div class="card-footer">
                 Launch App <span class="arrow">→</span>
             </div>
@@ -173,4 +207,5 @@
     </div>
 
 </body>
+
 </html>
