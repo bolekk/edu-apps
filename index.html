@@ -20,6 +20,12 @@
             --card-hover-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
         }
 
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Outfit', sans-serif;
             background-color: var(--bg-color);
@@ -72,7 +78,6 @@
             border: 1px solid transparent;
             display: flex;
             flex-direction: column;
-            height: 100%;
             position: relative;
             overflow: hidden;
             animation: fadeInUp 0.8s ease-out backwards;
@@ -91,6 +96,11 @@
         .card:nth-child(3) {
             animation-delay: 0.3s;
             border-top: 4px solid #3b82f6;
+        }
+
+        .card:nth-child(4) {
+            animation-delay: 0.4s;
+            border-top: 4px solid #8b5cf6;
         }
 
         .card:hover {
@@ -200,6 +210,15 @@
             <h2>Time Difference</h2>
             <p>Learn to calculate the difference between two timestamps. Test your skills across varying difficulty
                 levels.</p>
+            <div class="card-footer">
+                Launch App <span class="arrow">→</span>
+            </div>
+        </a>
+
+        <a href="./cubes/index.html" class="card">
+            <h2>Cubes Builder</h2>
+            <p>Build and visualize 3D structures with colorful cubes. Create, rotate, and explore in a 3D environment.
+            </p>
             <div class="card-footer">
                 Launch App <span class="arrow">→</span>
             </div>

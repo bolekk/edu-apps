@@ -1,0 +1,128 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    user-select: none;
+}
+
+#canvas-container {
+    width: 100vw;
+    height: 100vh;
+    display: block;
+}
+
+#ui-container {
+    position: absolute;
+    top: 80px;
+    left: 20px;
+    z-index: 10;
+    pointer-events: none;
+    /* Let clicks pass through to canvas where not on UI */
+}
+
+#controls {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 12px;
+    pointer-events: auto;
+    width: 250px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+h1 {
+    margin: 0 0 16px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.control-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+.color-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.color-btn {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.1s, border-color 0.1s;
+}
+
+.color-btn:hover {
+    transform: scale(1.1);
+}
+
+.color-btn.selected {
+    border-color: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+button {
+    background: #333;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #444;
+}
+
+button:active {
+    background: #222;
+}
+
+button.active {
+    background: #555;
+    border-color: #fff;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+#btn-delete.active {
+    background-color: #ff4444;
+    border-color: #ff0000;
+}
+
+
+
+.instructions {
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 16px;
+}
+
+.instructions p {
+    margin: 4px 0;
+    font-size: 0.8rem;
+    color: #ddd;
+}
+
+.instructions .note {
+    margin-top: 12px;
+    font-size: 0.75rem;
+    font-style: italic;
+    color: #888;
+    line-height: 1.4;
+}

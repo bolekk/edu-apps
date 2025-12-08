@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Cubes Builder</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: sans-serif;
+        }
+
+        .home-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            text-decoration: none;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 12px;
+            border-radius: 4px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .home-link:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+    </style>
+
+    <!-- Load Three.js globals (Old version r147 allows easy global scripts) -->
+    <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+
+<body>
+    <a href="../index.html" class="home-link">
+        <span>←</span> Home
+    </a>
+    <div id="ui-container">
+        <div id="controls">
+            <h1>Cubes Builder</h1>
+            <div class="control-group">
+                <label for="color-picker">Cube Color</label>
+                <div class="color-options" id="color-options">
+                    <div class="color-btn" style="background-color: #ff5555" data-color="#ff5555"></div>
+                    <div class="color-btn" style="background-color: #55ff55" data-color="#55ff55"></div>
+                    <div class="color-btn" style="background-color: #5555ff" data-color="#5555ff"></div>
+                    <div class="color-btn" style="background-color: #ffff55" data-color="#ffff55"></div>
+                    <div class="color-btn" style="background-color: #ff55ff" data-color="#ff55ff"></div>
+                    <div class="color-btn" style="background-color: #55ffff" data-color="#55ffff"></div>
+                    <div class="color-btn" style="background-color: #ffffff" data-color="#ffffff"></div>
+                    <div class="color-btn" style="background-color: #888888" data-color="#888888"></div>
+                </div>
+            </div>
+            <div class="control-group">
+                <button id="btn-view" class="active" style="margin-bottom: 8px;">👁️ View Mode</button>
+                <button id="btn-delete" style="margin-bottom: 8px;">🗑️ Delete Mode</button>
+                <button id="btn-clear">Clear Scene</button>
+            </div>
+            <div class="instructions">
+                <p><strong>Left Click</strong>: Place Cube</p>
+                <p><strong>Right Click / Drag</strong>: Rotate View</p>
+                <p><strong>Scroll</strong>: Zoom</p>
+                <p class="note">First cube can be placed anywhere on grid. Subsequent cubes must connect to existing
+                    ones.</p>
+            </div>
+        </div>
+    </div>
+    <div id="canvas-container"></div>
+
+    <!-- Application Logic -->
+    <script src="app.js"></script>
+</body>
+
+</html>
