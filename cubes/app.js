@@ -39,6 +39,7 @@ function init() {
     controls.dampingFactor = 0.05;
     controls.minDistance = 2;
     controls.maxDistance = 50;
+    controls.zoomSpeed = 0.3; // Slower zoom
 
     // Grid
     const gridHelper = new THREE.GridHelper(40, 40, 0x444444, 0x333333);
@@ -125,6 +126,9 @@ function updateUIState() {
     hoverCube.visible = false;
     selectionBox.visible = false;
 
+    // Default to controls disabled, enable only in view mode
+    controls.enabled = false;
+
     if (deleteMode) {
         if (btnDelete) btnDelete.classList.add('active');
         document.body.style.cursor = 'crosshair';
@@ -135,6 +139,7 @@ function updateUIState() {
     } else {
         // View Mode
         if (btnView) btnView.classList.add('active');
+        controls.enabled = true; // Enable controls ONLY in view mode
     }
 }
 

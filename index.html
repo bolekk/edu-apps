@@ -50,6 +50,7 @@
             font-weight: 600;
             margin-bottom: 0.5rem;
             background: linear-gradient(to right, #60a5fa, #c084fc);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -60,14 +61,17 @@
         }
 
         .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 4rem;
             width: 100%;
             max-width: 1200px;
         }
 
         .card {
+            flex: 1 1 300px;
+            max-width: 380px;
             background-color: var(--card-bg);
             border-radius: 1rem;
             padding: 2rem;
