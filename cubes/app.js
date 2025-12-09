@@ -87,6 +87,9 @@ function init() {
     });
 
     document.getElementById('btn-clear').addEventListener('click', clearCubes);
+    document.getElementById('btn-save').addEventListener('click', saveScene);
+    document.getElementById('btn-load').addEventListener('click', () => document.getElementById('file-input').click());
+    document.getElementById('file-input').addEventListener('change', loadScene);
 
     const btnDelete = document.getElementById('btn-delete');
     if (btnDelete) {
@@ -110,6 +113,48 @@ function init() {
     // Start Loop
     createCube(new THREE.Vector3(0.5, 0.5, 0.5), '#ff5555'); // Initial seed cube
     animate();
+}
+
+function saveScene() {
+    const data = {
+        cubes: cubes.map(c => ({
+            x: c.position.x,
+            y: c.position.y,
+            z: c.position.z,
+            color: '#' + c.material.color.getHexString()
+        }))
+    };
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cubes-scene.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function loadScene(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data.cubes && Array.isArray(data.cubes)) {
+                clearCubes();
+                data.cubes.forEach(c => {
+                    createCube(new THREE.Vector3(c.x, c.y, c.z), c.color);
+                });
+            }
+        } catch (err) {
+            console.error('Failed to load scene:', err);
+            alert('Invalid scene file');
+        }
+        // Reset input so same file can be loaded again
+        event.target.value = '';
+    };
+    reader.readAsText(file);
 }
 
 function updateUIState() {
