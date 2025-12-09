@@ -10,6 +10,7 @@ class App {
         this.foldProgress = 0; // 0 to 1
         this.speed = 0.5; // Speed multiplier
         this.clock = new THREE.Clock();
+        this.joints = [];
 
         this.initThree();
         this.initUI();
@@ -92,31 +93,102 @@ class App {
             thumbContainer.appendChild(div);
         });
 
-        // Controls
+        // Mode Switching
+        this.mode = 'global'; // 'global' or 'manual'
+        this.globalProgress = 0; // Current global state
+        this.globalTarget = 0;   // Target global state
+        this.isPaused = false;   // Only for global animation
+
+        const modeRadios = document.getElementsByName('mode');
+        const setupMode = () => {
+            this.mode = Array.from(modeRadios).find(r => r.checked).value;
+            const globControls = document.getElementById('global-controls');
+            const manControls = document.getElementById('manual-controls');
+
+            if (this.mode === 'global') {
+                globControls.style.display = 'block';
+                manControls.style.display = 'none';
+                // Sync Back: Snap global state to average of joints?
+                // Or just reset? Let's be smart: if most joints are folded, snap to 1.
+                let sum = 0;
+                this.joints.forEach(j => sum += j.current);
+                const avg = this.joints.length ? sum / this.joints.length : 0;
+                this.globalProgress = avg;
+                this.globalTarget = Math.round(avg);
+                this.slider.value = this.globalProgress;
+            } else {
+                globControls.style.display = 'none';
+                manControls.style.display = 'block';
+                // Init individual targets from current global state
+                this.joints.forEach(j => {
+                    // Keep current as-is
+                    // Set target to rounded current (so they complete their fold if mid-way)
+                    j.target = Math.round(j.current);
+                });
+            }
+        };
+
+        modeRadios.forEach(r => r.addEventListener('change', setupMode));
+
+        // Global Controls
         this.btnFold = document.getElementById('btn-fold');
         this.btnUnfold = document.getElementById('btn-unfold');
         this.btnPause = document.getElementById('btn-pause');
         this.slider = document.getElementById('slider-progress');
 
         this.btnFold.addEventListener('click', () => {
-            this.folding = true;
-            this.foldDirection = 1;
+            this.globalTarget = 1;
         });
 
         this.btnUnfold.addEventListener('click', () => {
-            this.folding = true;
-            this.foldDirection = -1;
+            this.globalTarget = 0;
         });
 
         this.btnPause.addEventListener('click', () => {
-            this.folding = !this.folding;
+            if (this.mode !== 'global') return;
+            this.isPaused = !this.isPaused;
+            this.btnPause.innerText = this.isPaused ? "Resume" : "Pause";
         });
 
         this.slider.addEventListener('input', (e) => {
-            this.foldProgress = parseFloat(e.target.value);
-            this.folding = false; // Stop animation when dragging
-            this.updateFold();
+            if (this.mode !== 'global') return;
+            const val = parseFloat(e.target.value);
+            this.globalTarget = val;
+            this.globalProgress = val; // Snapping feeling, but animation loop will handle smoothing if we differ
         });
+
+        // Raycaster for clicks
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+
+        this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
+        setupMode(); // Call once to set initial state
+    }
+
+    onCanvasClick(event) {
+        if (this.mode !== 'manual') return;
+
+        // Calculate mouse position
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+
+        // Intersect
+        const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+
+        if (intersects.length > 0) {
+            // Find first mesh with jointData
+            let hit = intersects.find(i => i.object.userData && i.object.userData.jointData);
+            if (hit) {
+                const jointData = hit.object.userData.jointData;
+                // Toggle target
+                if (jointData.dir) { // Ignore root which has no direction
+                    jointData.target = jointData.target > 0.5 ? 0 : 1;
+                }
+            }
+        }
     }
 
     getBounds(layout) {
@@ -137,7 +209,8 @@ class App {
         }
 
         // Reset state
-        this.foldProgress = 0;
+        this.globalProgress = 0;
+        this.globalTarget = 0;
         this.slider.value = 0;
 
         // Build Tree
@@ -232,88 +305,49 @@ class App {
             const lines = new THREE.LineSegments(edgeGeo, edgeMat);
             group.add(lines);
 
-            return group;
+            return { group, mesh }; // Return mesh for raycasting
         };
 
-        // Recursive creation
-        // Returns a Group that represents this node (and its children)
-        // If it's a child, the Group is pivoted at the edge shared with parent.
-
-        // Root is special: it's just at its position.
-        // But to make recursion uniform, let's say createNode(node) returns the Pivot Group.
-        // The Root's Pivot Group has no rotation (or matches the layout coords).
-
-        // Actually, easiest way:
-        // Root Group is at `node.pos`.
-        // Child Group is attached to Root Group.
-        // Pivot logic:
-        // If Child is RIGHT of Parent.
-        // Parent Mesh is at (0,0) (local).
-        // Joint is at (S/2, 0).
-        // Child Group is attached at Joint.
-        // Child Mesh is, relative to Joint, at (S/2, 0).
-        // Fold rotates Child Group around Joint.
-
         const build = (n) => {
-            const face = createFace(); // The visible square
-            // We wrapper face in a "Content Group" if needed, but 'face' group is fine as the mesh carrier.
-
-            // However, we need a structure:
-            // Joint -> FaceMesh
-            //       -> ChildJoint1
-            //       -> ChildJoint2
-
-            // For the Root, "Joint" is just the world placement.
-            // For children, "Joint" is the hinge.
+            const { group: faceGroup, mesh: faceMesh } = createFace();
 
             const joint = new THREE.Group();
-            // Store ref for animation
-            n.jointObject = joint;
-            this.joints.push({
+
+            // Define joint data object
+            const jointData = {
                 obj: joint,
-                dir: n.directionFromParent, // 'up', 'down', 'left', 'right'
-            });
+                dir: n.directionFromParent,
+                current: 0,
+                target: 0
+            };
+
+            this.joints.push(jointData);
+
+            // Attach data to mesh for click detection
+            faceMesh.userData.jointData = jointData;
 
             // Position the mesh relative to the joint
-            // If this is root, there's no direction, so mesh is at 0,0
             if (!n.directionFromParent) {
-                face.position.set(n.pos[0], n.pos[1], 0);
-                // We actually want the root to effectively be at (0,0) of the whole object, 
-                // and we position the whole object later.
-                // So let's keep local coordinates consistent with layout for the root.
-
-                // BUT: The recursion logic depends on hierarchical transform.
-                // If we use hierarchical, we ignore `n.pos` for children, only relative pos matters.
-
-                face.position.set(0, 0, 0);
-                joint.add(face);
-                // For root, we position the joint at world coordinates (or relative to container)
+                faceGroup.position.set(0, 0, 0);
+                joint.add(faceGroup);
                 joint.position.set(n.pos[0], n.pos[1], 0);
             } else {
-                // If child is RIGHT of parent:
-                // Joint is at Parent's local X = 0.5
-                // Child Mesh is at Joint's local X = 0.5
                 const dist = S / 2;
                 if (n.directionFromParent === 'right') {
-                    // Mesh center is +0.5 from pivot
-                    face.position.set(dist, 0, 0);
+                    faceGroup.position.set(dist, 0, 0);
                 } else if (n.directionFromParent === 'left') {
-                    face.position.set(-dist, 0, 0);
+                    faceGroup.position.set(-dist, 0, 0);
                 } else if (n.directionFromParent === 'up') {
-                    face.position.set(0, dist, 0);
+                    faceGroup.position.set(0, dist, 0);
                 } else if (n.directionFromParent === 'down') {
-                    face.position.set(0, -dist, 0);
+                    faceGroup.position.set(0, -dist, 0);
                 }
-                joint.add(face);
+                joint.add(faceGroup);
             }
 
             // Recurse for children
             n.children.forEach(child => {
                 const childJoint = build(child);
-
-                // Attach childJoint to THIS face/joint system
-                // Where does the childJoint attach?
-                // It attaches to the Edge of THIS face.
                 const dist = S / 2;
 
                 if (child.directionFromParent === 'right') { // Child is to the Right of THIS
@@ -326,71 +360,33 @@ class App {
                     childJoint.position.set(0, -dist, 0);
                 }
 
-                // If this is root, we added face to joint.
-                // If this is child, face is added to joint.
-                // So adding childJoint to joint works.
-                // WAIT. If I rotate `joint`, I rotate the face AND the children attached to it? YES.
-                // That's exactly what we want.
-
-                // Special case: Root 'joint' isn't really a hinge, it's the base.
-                // So if root rotates, everything rotates. (That's fine, orbit controls handles camera).
-
-                // IMPORTANT: The "Face" mesh is attached to `joint`.
-                // The `childJoint` is attached to `joint`. -> NO.
-                // If `joint` rotates (hinge), the Face rotates. The children attached to Face should rotate too.
-                // So yes, attach childJoint to joint.
-
-                // But wait, the childJoint's position must be relative to the Face center? No.
-                // `joint` is the Pivot Point of THIS node.
-                // Face is offset from Pivot.
-                // ChildJoint is on the OTHER side of the Face.
-                // So ChildJoint position = Face Center + Offset to Edge.
-
-                // Let's re-verify offsets.
-                // Case: Node (Right of Parent). 
-                // Parent Pivot (at Left Edge of Node).
-                // Node Mesh center (at +0.5).
-                // Child (Right of Node).
-                // Child Pivot needs to be at Right Edge of Node.
-                // Right Edge of Node = Node Mesh Center + 0.5 = +1.0 from Parent Pivot.
-
-                // Correct. Reference frame is `joint`.
-
                 if (!n.directionFromParent) {
-                    // Root case. Mesh is at 0,0.
-                    // Child 'right' needs to be at +0.5.
+                    // Root case
                     if (child.directionFromParent === 'right') childJoint.position.set(dist, 0, 0);
                     if (child.directionFromParent === 'left') childJoint.position.set(-dist, 0, 0);
                     if (child.directionFromParent === 'up') childJoint.position.set(0, dist, 0);
                     if (child.directionFromParent === 'down') childJoint.position.set(0, -dist, 0);
                 } else {
-                    // Child case. Mesh is at `offset` (e.g. +0.5).
-                    // Next Child 'right' needs to be at Mesh + 0.5 = +1.0.
+                    // Child case
                     if (n.directionFromParent === 'right') {
-                        // Current mesh at +0.5.
-                        // Right child joint at +1.0.
-                        // Left child joint at 0.0 (Back at pivot? No, that's impossible in tree).
-                        // Up child joint at (+0.5, +0.5).
-                        // Down child joint at (+0.5, -0.5).
                         const cx = dist; const cy = 0;
                         if (child.directionFromParent === 'right') childJoint.position.set(cx + dist, cy, 0);
-                        // if child is left, that's the parent, impossible.
                         if (child.directionFromParent === 'up') childJoint.position.set(cx, cy + dist, 0);
                         if (child.directionFromParent === 'down') childJoint.position.set(cx, cy - dist, 0);
                     }
-                    else if (n.directionFromParent === 'left') { // Mesh at -0.5
+                    else if (n.directionFromParent === 'left') {
                         const cx = -dist; const cy = 0;
                         if (child.directionFromParent === 'left') childJoint.position.set(cx - dist, cy, 0);
                         if (child.directionFromParent === 'up') childJoint.position.set(cx, cy + dist, 0);
                         if (child.directionFromParent === 'down') childJoint.position.set(cx, cy - dist, 0);
                     }
-                    else if (n.directionFromParent === 'up') { // Mesh at +0.5 Y
+                    else if (n.directionFromParent === 'up') {
                         const cx = 0; const cy = dist;
                         if (child.directionFromParent === 'up') childJoint.position.set(cx, cy + dist, 0);
                         if (child.directionFromParent === 'right') childJoint.position.set(cx + dist, cy, 0);
                         if (child.directionFromParent === 'left') childJoint.position.set(cx - dist, cy, 0);
                     }
-                    else if (n.directionFromParent === 'down') { // Mesh at -0.5 Y
+                    else if (n.directionFromParent === 'down') {
                         const cx = 0; const cy = -dist;
                         if (child.directionFromParent === 'down') childJoint.position.set(cx, cy - dist, 0);
                         if (child.directionFromParent === 'right') childJoint.position.set(cx + dist, cy, 0);
@@ -412,64 +408,64 @@ class App {
 
         const deltaTime = this.clock.getDelta();
 
-        if (this.folding) {
-            this.foldProgress += this.foldDirection * this.speed * deltaTime;
-            if (this.foldProgress > 1) {
-                this.foldProgress = 1;
-                this.folding = false;
+        if (this.mode === 'global') {
+            if (!this.isPaused) {
+                // Animate global progress towards global target
+                const diff = this.globalTarget - this.globalProgress;
+                if (Math.abs(diff) > 0.001) {
+                    const step = Math.sign(diff) * this.speed * deltaTime;
+                    if (Math.abs(step) > Math.abs(diff)) {
+                        this.globalProgress = this.globalTarget;
+                    } else {
+                        this.globalProgress += step;
+                    }
+                }
+
+                // FORCE Update all joints to match global progress
+                this.joints.forEach(j => {
+                    j.current = this.globalProgress;
+                    this.updateJointRotation(j);
+                });
+
+                // Update slider if we are animating (not dragging)
+                if (document.activeElement !== this.slider) {
+                    this.slider.value = this.globalProgress;
+                }
             }
-            if (this.foldProgress < 0) {
-                this.foldProgress = 0;
-                this.folding = false;
-            }
-            this.slider.value = this.foldProgress;
-            this.updateFold();
+        } else {
+            // Manual Mode: Animate individual joints
+            this.joints.forEach(j => {
+                if (!j.dir) return;
+
+                const diff = j.target - j.current;
+                if (Math.abs(diff) > 0.001) {
+                    const step = Math.sign(diff) * this.speed * deltaTime;
+                    if (Math.abs(step) > Math.abs(diff)) {
+                        j.current = j.target;
+                    } else {
+                        j.current += step;
+                    }
+                    this.updateJointRotation(j);
+                }
+            });
         }
 
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
     }
 
-    updateFold() {
-        // Angle = 90 deg * progress
-        const angle = this.foldProgress * (Math.PI / 2);
+    updateJointRotation(j) {
+        const angle = j.current * (Math.PI / 2);
 
-        this.joints.forEach(j => {
-            if (!j.dir) return; // Root
-
-            // Determine axis and direction
-            // We fold "UP" (towards +Z usually)
-            // If child is Right (X+), axis is Y. Rotate positive or negative?
-            // Right Rule: Thumb on +Y. Fingers curl Z->X. 
-            // We want Z to curl towards -X (Up and In). 
-            // Actually, if we fold up, the face moves from XY plane to +Z.
-            // Child at Right (+X). Folds up towards -X? No, folds up to stick up at X=pivot.
-            // It rotates around Y axis.
-
-            // Let's try uniform rotation.
-            if (j.dir === 'right') {
-                // Axis Y. 
-                // Initial normal Z. Target normal -X.
-                // Rotation +90 around Y? Z -> X. No.
-                // Rotation -90 around Y? Z -> -X.
-                j.obj.rotation.set(0, -angle, 0);
-            } else if (j.dir === 'left') {
-                // Left (-X).
-                // Axis Y.
-                // Rotation +90 around Y? Z -> X.
-                j.obj.rotation.set(0, angle, 0);
-            } else if (j.dir === 'up') {
-                // Up (+Y).
-                // Axis X.
-                // Rotation +90 around X? Z -> -Y.
-                j.obj.rotation.set(angle, 0, 0);
-            } else if (j.dir === 'down') {
-                // Down (-Y).
-                // Axis X.
-                // Rotation -90 around X? Z -> Y.
-                j.obj.rotation.set(-angle, 0, 0);
-            }
-        });
+        if (j.dir === 'right') {
+            j.obj.rotation.set(0, -angle, 0);
+        } else if (j.dir === 'left') {
+            j.obj.rotation.set(0, angle, 0);
+        } else if (j.dir === 'up') {
+            j.obj.rotation.set(angle, 0, 0);
+        } else if (j.dir === 'down') {
+            j.obj.rotation.set(-angle, 0, 0);
+        }
     }
 }
 

@@ -13,11 +13,25 @@
 <body>
     <div id="ui-container">
         <h1>Cube Nets</h1>
+        <div id="mode-selector"
+            style="margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom: 5px;">
+                <input type="radio" name="mode" value="global" checked> All-at-once Folding
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                <input type="radio" name="mode" value="manual"> Step-by-step Folding
+            </label>
+        </div>
         <div id="controls">
-            <button id="btn-fold">Fold</button>
-            <button id="btn-unfold">Unfold</button>
-            <button id="btn-pause">Pause/Resume</button>
-            <input type="range" id="slider-progress" min="0" max="1" step="0.01" value="0">
+            <div id="global-controls">
+                <button id="btn-fold">Fold All</button>
+                <button id="btn-unfold">Unfold All</button>
+                <button id="btn-pause">Pause/Resume</button>
+                <input type="range" id="slider-progress" min="0" max="1" step="0.01" value="0">
+            </div>
+            <div id="manual-controls" style="display:none; color: #888; font-size: 0.9em; text-align: center;">
+                Click on faces to fold/unfold them individually.
+            </div>
         </div>
         <div id="selector">
             <h3>Select a Net:</h3>
