@@ -1,0 +1,413 @@
+:root {
+    --primary-color: #6366f1;
+    --secondary-color: #ec4899;
+    --accent-color: #8b5cf6;
+    --background-color: #f0f9ff;
+    --text-color: #1e293b;
+    --pan-color: #94a3b8;
+    --beam-color: #475569;
+    --weight-color: #f59e0b;
+    --mystery-color: #10b981;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 1200px;
+    /* Wider for side-by-side */
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.home-button {
+    align-self: center;
+    /* Center it in the sidebar, or flex-start? User said left-hand side. */
+    /* align-self: flex-start; */
+    margin-top: 1rem;
+    /* Space from New Game button */
+    margin-bottom: 0;
+    /* ...keep other styles... */
+    text-decoration: none;
+    background-color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: var(--primary-color);
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: transform 0.2s;
+    border: 1px solid #cbd5e1;
+    /* Add border to match inputs since it's button-like now */
+}
+
+.home-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.main-layout {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+/* Responsive: Stack on mobile */
+@media (max-width: 850px) {
+    .main-layout {
+        flex-direction: column-reverse;
+        /* Scale on top on mobile? Or controls? User asked for controls on left (desktop). Usually controls below scale on mobile. */
+        align-items: center;
+    }
+
+    /* If we use column-reverse, controls (first in DOM) go to bottom. Scale (second) goes to top. */
+    /* Wait, I put controls FIRST in DOM. */
+    /* flex-direction: column; -> Controls on TOP. Scale on BOTTOM. */
+    /* Usually scale should represent state. Might want scale on top. */
+    /* Let's stick to column-reverse so Scale is visual first, Controls below. */
+    /* DOM: Controls, Scale */
+    /* column-reverse: Scale (top), Controls (bottom) */
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.scale-container {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0;
+    flex: 2;
+    /* Flex item in main-layout */
+}
+
+.balance-beam {
+    width: 80%;
+    height: 10px;
+    background-color: var(--beam-color);
+    position: relative;
+    top: 60px;
+    /* Adjusted for closer alignment */
+    transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transform-origin: center;
+    border-radius: 5px;
+}
+
+.pan {
+    position: absolute;
+    width: 120px;
+    height: 10px;
+    /* Minimal height for the connector */
+    top: 5px;
+    /* Connect to beam */
+}
+
+/* Visual strings/chains for pans */
+.pan::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    width: 2px;
+    height: 150px;
+    /* Longer strings for taller look */
+    background-color: #cbd5e1;
+    transform: rotate(15deg);
+    transform-origin: top;
+}
+
+.pan::after {
+    content: '';
+    position: absolute;
+    right: 10px;
+    top: 0;
+    width: 2px;
+    height: 150px;
+    /* Longer strings for taller look */
+    background-color: #cbd5e1;
+    transform: rotate(-15deg);
+    transform-origin: top;
+}
+
+/* The actual plate of the pan */
+
+
+.left-pan {
+    left: 0;
+}
+
+.right-pan {
+    right: 0;
+}
+
+
+
+/* Let's redo pan structure slightly in HTML or use this:
+   The pan div is the anchor on the beam.
+   Inside it, we render the strings and the basket.
+*/
+.pan {
+    display: flex;
+    justify-content: center;
+}
+
+.pan-basket {
+    position: absolute;
+    top: 150px;
+    width: 140px;
+    min-height: 40px;
+    background: rgba(148, 163, 184, 0.5);
+    border: 2px solid var(--pan-color);
+    border-radius: 10px 10px 50px 50px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-end;
+    justify-content: center;
+    padding: 10px;
+    gap: 5px;
+    /* Rotate opposite to beam to keep level? CSS transforms stack, so it might tilt with beam.
+       Ideally we counter-rotate, but simple version: let it tilt.
+    */
+    transition: transform 1s;
+}
+
+.fulcrum {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 40px solid var(--beam-color);
+    z-index: -1;
+    /* Behind beam */
+}
+
+.base {
+    position: absolute;
+    bottom: 0;
+    width: 200px;
+    height: 20px;
+    background-color: var(--beam-color);
+    border-radius: 10px;
+}
+
+.controls-area {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.difficulty-control {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+    background: #f1f5f9;
+    border-radius: 0.5rem;
+}
+
+.difficulty-control select {
+    flex: 1;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid #cbd5e1;
+    font-size: 1rem;
+}
+
+
+
+/* Stack actions in the sidebar */
+
+
+.weights-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    min-height: 60px;
+    padding: 10px;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+}
+
+.weight {
+    width: 40px;
+    height: 40px;
+    background-color: var(--weight-color);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: white;
+    cursor: grab;
+    user-select: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 1.2rem;
+}
+
+.weight.mystery {
+    background-color: var(--mystery-color);
+    border-radius: 50%;
+    /* Circle for x */
+}
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+}
+
+.trash-zone {
+    border: 2px dashed #ef4444;
+    border-color: #ef4444;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 150px;
+}
+
+.guess-zone {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+input[type="number"] {
+    padding: 0.5rem;
+    border: 2px solid #cbd5e1;
+    border-radius: 0.5rem;
+    width: 60px;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: transform 0.1s;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+#newGameBtn {
+    margin-top: 2rem;
+    background-color: var(--accent-color);
+}
+
+.hidden {
+    display: none;
+}
+
+#feedback {
+    margin-top: 1rem;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+.feedback-info {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.feedback-success {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.feedback-error {
+    background-color: #fee2e2;
+
+    color: #991b1b;
+}
+
+/* Improved Status Light */
+.status-light {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1.5rem;
+    font-weight: bold;
+    color: white;
+    border-radius: 2rem;
+    margin: 0 auto 2rem;
+    /* Reduced top margin, some bottom for spacing to scale */
+    font-size: 1.2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* .status-light::after removed, using textContent */
+
+/* Icons */
+.status-light.red::before {
+    content: '⚠️';
+    margin-right: 0.5rem;
+}
+
+.status-light.green::before {
+    content: '✅';
+    margin-right: 0.5rem;
+}
+
+.status-light.red {
+    background-color: #ef4444;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+.status-light.green {
+    background-color: #22c55e;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+}
