@@ -238,6 +238,9 @@ function handleDrop(e) {
             state.rightWeights.push(createWeightObj(draggedItem.value, draggedItem.type));
 
             showFeedback(`Added ${draggedItem.type === 'mystery' ? 'X' : draggedItem.value} to BOTH sides.`, 'info');
+            render();
+            updateScale();
+            triggerChangeAnimation();
         }
     }
 
@@ -260,6 +263,9 @@ function handleDrop(e) {
             }
 
             showFeedback(`Removed ${draggedItem.type === 'mystery' ? 'X' : draggedItem.value} from BOTH sides.`, 'info');
+            render();
+            updateScale();
+            triggerChangeAnimation();
         } else {
             showFeedback(`Cannot remove! Other side doesn't have enough weight to match.`, 'error');
             draggedItem = null;
@@ -267,9 +273,6 @@ function handleDrop(e) {
             return;
         }
     }
-
-    render();
-    updateScale();
     draggedItem = null;
     draggedFrom = null;
 }
@@ -413,6 +416,13 @@ function showFeedback(msg, type) {
 
 function hideFeedback() {
     DOM.feedback.classList.add('hidden');
+}
+
+function triggerChangeAnimation() {
+    const baskets = document.querySelectorAll('.pan-basket');
+    baskets.forEach(b => {
+        b.classList.add('flash-update');
+    });
 }
 
 function triggerWinAnimation() {
