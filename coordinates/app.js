@@ -27,6 +27,8 @@ const state = {
     hovered: null
 };
 
+let dirty = true;
+
 // --- DOM Elements ---
 const canvas = document.getElementById('grid');
 const ctx = canvas.getContext('2d');
@@ -54,6 +56,7 @@ function init() {
 
     showGridCheckbox.addEventListener('change', (e) => {
         state.view.showGrid = e.target.checked;
+        dirty = true;
     });
 
     // Canvas Interaction
@@ -72,6 +75,7 @@ function resize() {
     canvas.height = window.innerHeight;
     state.view.offsetX = canvas.width / 2;
     state.view.offsetY = canvas.height / 2;
+    dirty = true;
 }
 
 // --- Interaction Logic ---
@@ -169,6 +173,7 @@ function handleMove(e) {
             if (item && (item.x !== newX || item.y !== newY)) {
                 item.x = newX;
                 item.y = newY;
+                dirty = true;
                 renderUI();
             }
             canvas.style.cursor = 'move';
@@ -182,6 +187,7 @@ function handleMove(e) {
                     const newB = Math.round(gridY - item.a * gridX);
                     if (item.b !== newB) {
                         item.b = newB;
+                        dirty = true;
                         renderUI();
                     }
                     canvas.style.cursor = 'move';
@@ -196,6 +202,7 @@ function handleMove(e) {
 
                     if (item.value !== newValue) {
                         item.value = newValue;
+                        dirty = true;
                         renderUI();
                     }
                     canvas.style.cursor = state.dragging.axis === 'x' ? 'ew-resize' : 'ns-resize';
@@ -274,6 +281,7 @@ function addInequality(axis) {
     };
 
     state.inequalities.push(newItem);
+    dirty = true;
     renderUI();
 }
 
@@ -292,6 +300,7 @@ function addLinearInequality() {
     };
 
     state.inequalities.push(newItem);
+    dirty = true;
     renderUI();
 }
 
@@ -309,16 +318,19 @@ function addPoint() {
     };
 
     state.points.push(newItem);
+    dirty = true;
     renderUI();
 }
 
 function removeInequality(id) {
     state.inequalities = state.inequalities.filter(item => item.id !== id);
+    dirty = true;
     renderUI();
 }
 
 function removePoint(id) {
     state.points = state.points.filter(item => item.id !== id);
+    dirty = true;
     renderUI();
 }
 
@@ -326,6 +338,7 @@ function updateInequality(id, updates) {
     const item = state.inequalities.find(i => i.id === id);
     if (item) {
         Object.assign(item, updates);
+        dirty = true;
         renderUI(); // Re-render UI to reflect changes (e.g. value update)
     }
 }
@@ -334,6 +347,7 @@ function updatePoint(id, updates) {
     const item = state.points.find(i => i.id === id);
     if (item) {
         Object.assign(item, updates);
+        dirty = true;
         renderUI();
     }
 }
@@ -341,7 +355,10 @@ function updatePoint(id, updates) {
 // --- Rendering ---
 
 function loop() {
-    draw();
+    if (dirty) {
+        draw();
+        dirty = false;
+    }
     requestAnimationFrame(loop);
 }
 
@@ -693,42 +710,53 @@ function renderUI() {
                 <div class="color-indicator" style="background-color: ${item.color}"></div>
                 <div class="axis-label">Y</div>
                 <div class="select-wrapper">
-                    <select onchange="updateInequality('${item.id}', { operator: this.value })">
+                    <select>
                         <option value=">" ${item.operator === '>' ? 'selected' : ''}>&gt;</option>
                         <option value="<" ${item.operator === '<' ? 'selected' : ''}>&lt;</option>
                     </select>
                 </div>
                 <div style="display: flex; gap: 4px; align-items: center;">
-                    <input type="number" class="number-input" style="width: 40px;" value="${item.a}" onchange="updateInequality('${item.id}', { a: parseInt(this.value) })">
+                    <input type="number" class="number-input" style="width: 40px;" value="${item.a}">
                     <span style="color: var(--text-secondary); font-size: 14px; font-weight: 600;">X +</span>
-                    <input type="number" class="number-input" style="width: 40px;" value="${item.b}" onchange="updateInequality('${item.id}', { b: parseInt(this.value) })">
+                    <input type="number" class="number-input" style="width: 40px;" value="${item.b}">
                 </div>
-                <button class="icon-btn danger" onclick="removeInequality('${item.id}')">
+                <button class="icon-btn danger">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </button>
             `;
+            const [selectEl] = el.querySelectorAll('select');
+            const [inputA, inputB] = el.querySelectorAll('input[type="number"]');
+            selectEl.addEventListener('change', () => updateInequality(item.id, { operator: selectEl.value }));
+            inputA.addEventListener('change', () => updateInequality(item.id, { a: parseInt(inputA.value) }));
+            inputB.addEventListener('change', () => updateInequality(item.id, { b: parseInt(inputB.value) }));
         } else {
             el.innerHTML = `
                 <div class="color-indicator" style="background-color: ${item.color}"></div>
                 <div class="axis-label">${item.axis.toUpperCase()}</div>
                 <div class="select-wrapper">
-                    <select onchange="updateInequality('${item.id}', { operator: this.value })">
+                    <select>
                         <option value=">" ${item.operator === '>' ? 'selected' : ''}>&gt;</option>
                         <option value="<" ${item.operator === '<' ? 'selected' : ''}>&lt;</option>
                     </select>
                 </div>
-                <input type="number" class="number-input" value="${item.value}" onchange="updateInequality('${item.id}', { value: parseInt(this.value) })">
-                <button class="icon-btn danger" onclick="removeInequality('${item.id}')">
+                <input type="number" class="number-input" value="${item.value}">
+                <button class="icon-btn danger">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </button>
             `;
+            const selectEl = el.querySelector('select');
+            const inputEl = el.querySelector('input[type="number"]');
+            selectEl.addEventListener('change', () => updateInequality(item.id, { operator: selectEl.value }));
+            inputEl.addEventListener('change', () => updateInequality(item.id, { value: parseInt(inputEl.value) }));
         }
+
+        el.querySelector('button.danger').addEventListener('click', () => removeInequality(item.id));
         uiList.appendChild(el);
     });
 
@@ -741,32 +769,34 @@ function renderUI() {
             <div class="axis-label">P</div>
             <div style="display: flex; gap: 4px; align-items: center;">
                 <span style="color: var(--text-secondary); font-size: 12px;">X:</span>
-                <input type="number" class="number-input" style="width: 40px;" value="${item.x}" onchange="updatePoint('${item.id}', { x: parseInt(this.value) })">
+                <input type="number" class="number-input" style="width: 40px;" value="${item.x}">
             </div>
             <div style="display: flex; gap: 4px; align-items: center;">
                 <span style="color: var(--text-secondary); font-size: 12px;">Y:</span>
-                <input type="number" class="number-input" style="width: 40px;" value="${item.y}" onchange="updatePoint('${item.id}', { y: parseInt(this.value) })">
+                <input type="number" class="number-input" style="width: 40px;" value="${item.y}">
             </div>
             <div style="display: flex; align-items: center; gap: 4px;">
-                <input type="checkbox" id="dist-${item.id}" ${item.showDistances ? 'checked' : ''} onchange="updatePoint('${item.id}', { showDistances: this.checked })">
-                <label for="dist-${item.id}" style="color: var(--text-secondary); font-size: 12px; cursor: pointer;">Show Distances</label>
+                <input type="checkbox" ${item.showDistances ? 'checked' : ''}>
+                <label style="color: var(--text-secondary); font-size: 12px; cursor: pointer;">Show Distances</label>
             </div>
-            <button class="icon-btn danger" onclick="removePoint('${item.id}')">
+            <button class="icon-btn danger">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
         `;
+        const [inputX, inputY] = el.querySelectorAll('input[type="number"]');
+        const checkboxEl = el.querySelector('input[type="checkbox"]');
+        const labelEl = el.querySelector('label');
+        labelEl.addEventListener('click', () => { checkboxEl.checked = !checkboxEl.checked; updatePoint(item.id, { showDistances: checkboxEl.checked }); });
+        inputX.addEventListener('change', () => updatePoint(item.id, { x: parseInt(inputX.value) }));
+        inputY.addEventListener('change', () => updatePoint(item.id, { y: parseInt(inputY.value) }));
+        checkboxEl.addEventListener('change', () => updatePoint(item.id, { showDistances: checkboxEl.checked }));
+        el.querySelector('button.danger').addEventListener('click', () => removePoint(item.id));
         uiList.appendChild(el);
     });
 }
-
-// Expose functions to global scope for HTML event handlers
-window.updateInequality = updateInequality;
-window.removeInequality = removeInequality;
-window.updatePoint = updatePoint;
-window.removePoint = removePoint;
 
 // Start
 init();
