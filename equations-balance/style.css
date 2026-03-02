@@ -429,3 +429,17 @@ button:hover {
 .flash-update {
     animation: flash-gold 0.8s ease-out forwards;
 }
+
+.equals-sign {
+    position: absolute;
+    left: 50%;
+    top: 260px;
+    transform: translate(-50%, -50%);
+    font-size: 10rem;
+    font-weight: 900;
+    color: black;
+    z-index: 0;
+    user-select: none;
+    pointer-events: none;
+    opacity: 0.8;
+}

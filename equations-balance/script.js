@@ -311,10 +311,10 @@ function performSubtract(list, itemToRemove, sideToUpdate) {
     } else {
         let remainingToRemove = itemToRemove.value;
 
-        // Sort descending to tackle biggest blocks first (cleaner splits)
+        // Sort ascending to tackle smallest blocks first (maximize number of removed weights)
         // We need to modify the array in place or rebuild it.
         // Let's categorize knowns vs mysteries
-        let knowns = list.filter(w => w.type === 'known').sort((a, b) => b.value - a.value);
+        let knowns = list.filter(w => w.type === 'known').sort((a, b) => a.value - b.value);
         let others = list.filter(w => w.type !== 'known');
 
         let newKnowns = [];
