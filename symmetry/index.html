@@ -25,6 +25,7 @@
             <button class="tool-btn" data-tool="rect" title="Rectangle">▬</button>
             <button class="tool-btn" data-tool="triangle" title="Triangle">▲</button>
             <button class="tool-btn" data-tool="polygon" title="Polygon">⬡</button>
+            <button class="tool-btn" data-tool="move" title="Move">✋</button>
         </div>
 
         <hr>
@@ -39,6 +40,10 @@
         <hr>
 
         <button id="reflect-btn" class="text-btn primary full-width">Reflect!</button>
+        <label class="toggle-row">
+            <input type="checkbox" id="preserve-both-cb">
+            <span class="toggle-label-text">Keep original</span>
+        </label>
         <button id="clear-btn" class="text-btn full-width">Clear All</button>
 
         <div class="hint" id="hint-text">Draw a shape to get started.</div>

@@ -30,6 +30,22 @@ const toolBtns = document.querySelectorAll('.tool-btn');
 const mirrorHBtn = document.getElementById('mirror-h-btn');
 const mirrorVBtn = document.getElementById('mirror-v-btn');
 const mirrorDBtn = document.getElementById('mirror-d-btn');
+const preserveBothCb = document.getElementById('preserve-both-cb');
+
+// --- Camera ---
+const camera = { x: 0, y: 0, scale: 1 };
+let isPanning = false;
+let panStart = null;   // { sx, sy, cx, cy } screen start + camera start
+let spaceDown = false;
+let pinchState = null; // { dist, midX, midY, cx, cy, cs }
+
+function screenToWorld(sx, sy) {
+    return { x: (sx - camera.x) / camera.scale, y: (sy - camera.y) / camera.scale };
+}
+
+function worldToScreen(wx, wy) {
+    return { x: wx * camera.scale + camera.x, y: wy * camera.scale + camera.y };
+}
 
 // --- State ---
 let dirty = true;
@@ -40,6 +56,14 @@ const state = {
     shapes: [],
     drawing: null,
     cursorPos: null,
+    preserveBoth: false,
+    move: {
+        dragging: false,
+        shapeIndex: -1,
+        hoveredIndex: -1,
+        dragStartMouse: null,
+        shapeSnapshot: null
+    },
     mirror: {
         x1: 0, y1: 0,
         x2: 0, y2: 0,
@@ -152,55 +176,97 @@ function getPointerPos(e) {
 
 // --- Mirror Hit Testing ---
 
-function hitTestMirrorEndpoint(x, y) {
+function hitTestMirrorEndpoint(wx, wy) {
     const { x1, y1, x2, y2 } = state.mirror;
-    if (Math.hypot(x - x1, y - y1) <= CONFIG.endpointHitRadius) return 'p1';
-    if (Math.hypot(x - x2, y - y2) <= CONFIG.endpointHitRadius) return 'p2';
+    const r = CONFIG.endpointHitRadius / camera.scale;
+    if (Math.hypot(wx - x1, wy - y1) <= r) return 'p1';
+    if (Math.hypot(wx - x2, wy - y2) <= r) return 'p2';
     return null;
 }
 
-function hitTestMirrorLine(x, y) {
+function hitTestMirrorLine(wx, wy) {
     const { x1, y1, x2, y2 } = state.mirror;
     const dx = x2 - x1;
     const dy = y2 - y1;
     const lenSq = dx * dx + dy * dy;
     if (lenSq < 1) return false;
-    const t = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / lenSq));
+    const t = Math.max(0, Math.min(1, ((wx - x1) * dx + (wy - y1) * dy) / lenSq));
     const closestX = x1 + t * dx;
     const closestY = y1 + t * dy;
-    return Math.hypot(x - closestX, y - closestY) <= 10;
+    return Math.hypot(wx - closestX, wy - closestY) <= 10 / camera.scale;
+}
+
+// --- Shape Hit Testing ---
+
+function pointInPolygon(x, y, pts) {
+    let inside = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+        const xi = pts[i].x, yi = pts[i].y;
+        const xj = pts[j].x, yj = pts[j].y;
+        if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+            inside = !inside;
+        }
+    }
+    return inside;
+}
+
+function hitTestShape(wx, wy) {
+    for (let i = state.shapes.length - 1; i >= 0; i--) {
+        const s = state.shapes[i];
+        if (s.type === 'circle') {
+            if (Math.hypot(wx - s.cx, wy - s.cy) <= s.r) return i;
+        } else {
+            if (pointInPolygon(wx, wy, s.pts || rectToPts(s))) return i;
+        }
+    }
+    return -1;
+}
+
+function moveShape(shape, snapshot, dx, dy) {
+    if (shape.type === 'circle') {
+        shape.cx = snapshot.cx + dx;
+        shape.cy = snapshot.cy + dy;
+    } else if (shape.type === 'rect') {
+        shape.x = snapshot.x + dx;
+        shape.y = snapshot.y + dy;
+    } else {
+        shape.pts = snapshot.pts.map(p => ({ x: p.x + dx, y: p.y + dy }));
+    }
 }
 
 // --- Mirror Presets ---
 
+function viewCenter() {
+    return screenToWorld(canvas.width / 2, canvas.height / 2);
+}
+
 function setMirrorHorizontal() {
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    state.mirror.x1 = cx - canvas.width * 0.3;
-    state.mirror.y1 = cy;
-    state.mirror.x2 = cx + canvas.width * 0.3;
-    state.mirror.y2 = cy;
+    const c = viewCenter();
+    const span = canvas.width * 0.3 / camera.scale;
+    state.mirror.x1 = c.x - span;
+    state.mirror.y1 = c.y;
+    state.mirror.x2 = c.x + span;
+    state.mirror.y2 = c.y;
     dirty = true;
 }
 
 function setMirrorVertical() {
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    state.mirror.x1 = cx;
-    state.mirror.y1 = cy - canvas.height * 0.3;
-    state.mirror.x2 = cx;
-    state.mirror.y2 = cy + canvas.height * 0.3;
+    const c = viewCenter();
+    const span = canvas.height * 0.3 / camera.scale;
+    state.mirror.x1 = c.x;
+    state.mirror.y1 = c.y - span;
+    state.mirror.x2 = c.x;
+    state.mirror.y2 = c.y + span;
     dirty = true;
 }
 
 function setMirrorDiagonal() {
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    const span = Math.min(canvas.width, canvas.height) * 0.3;
-    state.mirror.x1 = cx - span;
-    state.mirror.y1 = cy - span;
-    state.mirror.x2 = cx + span;
-    state.mirror.y2 = cy + span;
+    const c = viewCenter();
+    const span = Math.min(canvas.width, canvas.height) * 0.3 / camera.scale;
+    state.mirror.x1 = c.x - span;
+    state.mirror.y1 = c.y - span;
+    state.mirror.x2 = c.x + span;
+    state.mirror.y2 = c.y + span;
     dirty = true;
 }
 
@@ -256,31 +322,39 @@ function tickAnimation() {
     const anim = state.anim;
     const now = performance.now();
     const raw = Math.min((now - anim.startTime) / anim.duration, 1);
-    const t = easeOutBack(raw);
     anim.mirrorGlow = Math.sin(raw * Math.PI);
 
-    const interpShapes = anim.fromShapes.map((s, i) => lerpShape(s, anim.toShapes[i], t));
-
-    // Draw originals fading out
-    const fadeAlpha = Math.max(0, 1 - raw * 1.5);
-    if (fadeAlpha > 0) {
-        ctx.globalAlpha = fadeAlpha;
+    if (state.preserveBoth) {
+        // Originals stay in place; reflected copies fade in at their final position
         drawShapes(anim.fromShapes);
+        ctx.globalAlpha = Math.sin(raw * Math.PI / 2); // smooth 0 → 1
+        drawShapes(anim.toShapes);
         ctx.globalAlpha = 1;
+    } else {
+        const t = easeOutBack(raw);
+        const interpShapes = anim.fromShapes.map((s, i) => lerpShape(s, anim.toShapes[i], t));
+
+        // Draw originals fading out
+        const fadeAlpha = Math.max(0, 1 - raw * 1.5);
+        if (fadeAlpha > 0) {
+            ctx.globalAlpha = fadeAlpha;
+            drawShapes(anim.fromShapes);
+            ctx.globalAlpha = 1;
+        }
+
+        // Draw interpolated shapes
+        drawShapes(interpShapes);
     }
 
-    // Draw interpolated shapes
-    drawShapes(interpShapes);
-
     if (raw >= 1) {
-        state.shapes = anim.toShapes;
+        state.shapes = state.preserveBoth
+            ? [...anim.fromShapes, ...anim.toShapes]
+            : anim.toShapes;
         anim.running = false;
         anim.mirrorGlow = 0;
         reflectBtn.classList.remove('animating');
         updateHint('Reflected! Click Reflect! again or draw more shapes.');
     }
-
-    return interpShapes;
 }
 
 // --- Clear ---
@@ -317,26 +391,57 @@ function tryClosePolygon() {
 // --- Rendering ---
 
 function drawGrid() {
+    const step = CONFIG.gridStep;
+    const tl = screenToWorld(0, 0);
+    const br = screenToWorld(canvas.width, canvas.height);
+    const x0 = Math.floor(tl.x / step) * step;
+    const y0 = Math.floor(tl.y / step) * step;
+
     ctx.save();
     ctx.strokeStyle = `rgba(255,255,255,${CONFIG.gridAlpha})`;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1 / camera.scale;
     ctx.beginPath();
-    const step = CONFIG.gridStep;
-    for (let x = 0; x < canvas.width; x += step) {
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
+    for (let x = x0; x <= br.x; x += step) {
+        ctx.moveTo(x, tl.y);
+        ctx.lineTo(x, br.y);
     }
-    for (let y = 0; y < canvas.height; y += step) {
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
+    for (let y = y0; y <= br.y; y += step) {
+        ctx.moveTo(tl.x, y);
+        ctx.lineTo(br.x, y);
     }
     ctx.stroke();
     ctx.restore();
 }
 
+// Returns the t-range where P(t) = (x1,y1) + t*(dx,dy) is inside the viewport.
+// t=0 → p1, t=1 → p2. Extensions are where tMin<0 or tMax>1.
+function mirrorLineClip(x1, y1, x2, y2) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const tl = screenToWorld(0, 0);
+    const br = screenToWorld(canvas.width, canvas.height);
+    let tMin = -1e9, tMax = 1e9;
+
+    if (Math.abs(dx) > 1e-9) {
+        const ta = (tl.x - x1) / dx, tb = (br.x - x1) / dx;
+        tMin = Math.max(tMin, Math.min(ta, tb));
+        tMax = Math.min(tMax, Math.max(ta, tb));
+    } else if (x1 < tl.x || x1 > br.x) return null;
+
+    if (Math.abs(dy) > 1e-9) {
+        const ta = (tl.y - y1) / dy, tb = (br.y - y1) / dy;
+        tMin = Math.max(tMin, Math.min(ta, tb));
+        tMax = Math.min(tMax, Math.max(ta, tb));
+    } else if (y1 < tl.y || y1 > br.y) return null;
+
+    return tMin < tMax ? { tMin, tMax } : null;
+}
+
 function drawMirrorLine() {
     const { x1, y1, x2, y2 } = state.mirror;
     const glow = state.anim.mirrorGlow;
+    const dx = x2 - x1, dy = y2 - y1;
+    const mainLen = Math.hypot(dx, dy);
+    const PERIOD = 16; // dash (10) + gap (6)
 
     ctx.save();
 
@@ -351,6 +456,35 @@ function drawMirrorLine() {
         ctx.shadowBlur = 40 * glow;
         ctx.stroke();
         ctx.shadowBlur = 0;
+    }
+
+    // Faint extensions to viewport edges
+    const clip = mirrorLineClip(x1, y1, x2, y2);
+    if (clip) {
+        ctx.strokeStyle = 'rgba(248,250,252,0.18)';
+        ctx.lineWidth = CONFIG.mirrorLineWidth;
+        ctx.setLineDash([10, 6]);
+
+        if (clip.tMin < 0) {
+            // Before p1: offset so dashes arrive at p1 in phase with the main segment (phase 0)
+            const extLen = -clip.tMin * mainLen;
+            ctx.lineDashOffset = extLen % PERIOD;
+            ctx.beginPath();
+            ctx.moveTo(x1 + clip.tMin * dx, y1 + clip.tMin * dy);
+            ctx.lineTo(x1, y1);
+            ctx.stroke();
+        }
+
+        if (clip.tMax > 1) {
+            // After p2: continue from wherever the main segment's dashes end
+            ctx.lineDashOffset = (PERIOD - mainLen % PERIOD) % PERIOD;
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x1 + clip.tMax * dx, y1 + clip.tMax * dy);
+            ctx.stroke();
+        }
+
+        ctx.setLineDash([]);
     }
 
     // Main dashed line
@@ -491,18 +625,33 @@ function drawInProgressShape() {
 
             // Highlight close-ring on first point when near enough
             if (cur && pts.length >= 3) {
-                if (Math.hypot(cur.x - pts[0].x, cur.y - pts[0].y) <= CONFIG.polygonCloseRadius) {
+                const closeR = CONFIG.polygonCloseRadius / camera.scale;
+                if (Math.hypot(cur.x - pts[0].x, cur.y - pts[0].y) <= closeR) {
                     ctx.setLineDash([]);
                     ctx.beginPath();
-                    ctx.arc(pts[0].x, pts[0].y, CONFIG.polygonCloseRadius, 0, Math.PI * 2);
+                    ctx.arc(pts[0].x, pts[0].y, closeR, 0, Math.PI * 2);
                     ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-                    ctx.lineWidth = 1.5;
+                    ctx.lineWidth = 1.5 / camera.scale;
                     ctx.stroke();
                 }
             }
         }
     }
 
+    ctx.restore();
+}
+
+function drawMoveSelection() {
+    if (state.tool !== 'move') return;
+    const idx = state.move.dragging ? state.move.shapeIndex : state.move.hoveredIndex;
+    if (idx < 0 || idx >= state.shapes.length) return;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.lineWidth = (CONFIG.shapeLineWidth + 2) / camera.scale;
+    ctx.setLineDash([6 / camera.scale, 3 / camera.scale]);
+    drawShapeOutline(state.shapes[idx]);
+    ctx.stroke();
+    ctx.setLineDash([]);
     ctx.restore();
 }
 
@@ -513,6 +662,9 @@ function draw() {
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    ctx.save();
+    ctx.setTransform(camera.scale, 0, 0, camera.scale, camera.x, camera.y);
+
     drawGrid();
     drawMirrorLine();
 
@@ -520,10 +672,13 @@ function draw() {
         tickAnimation();
     } else {
         drawShapes(state.shapes);
+        drawMoveSelection();
         drawInProgressShape();
     }
 
     drawMirrorEndpoints();
+
+    ctx.restore();
 }
 
 // --- Render Loop ---
@@ -538,9 +693,26 @@ function loop() {
 
 // --- Event Handling ---
 
+function defaultCursor() {
+    if (spaceDown) return 'grab';
+    if (state.tool === 'move') return 'default';
+    return 'crosshair';
+}
+
 function handlePointerDown(e) {
+    // Middle mouse, right-click (two-finger tap on Mac), or Space+left → pan
+    if (e.button === 1 || e.button === 2 || (e.button === 0 && spaceDown)) {
+        isPanning = true;
+        panStart = { sx: e.clientX, sy: e.clientY, cx: camera.x, cy: camera.y };
+        canvas.style.cursor = 'grabbing';
+        e.preventDefault();
+        return;
+    }
+
     if (e.button !== undefined && e.button !== 0) return;
-    const { x, y } = getPointerPos(e);
+
+    const screen = getPointerPos(e);
+    const { x, y } = screenToWorld(screen.x, screen.y);
 
     // Priority 1: Mirror endpoint drag
     const ep = hitTestMirrorEndpoint(x, y);
@@ -564,7 +736,24 @@ function handlePointerDown(e) {
         return;
     }
 
-    // Priority 3: Drawing tool
+    // Priority 3: Move tool
+    if (state.tool === 'move') {
+        if (!state.anim.running) {
+            const idx = hitTestShape(x, y);
+            if (idx !== -1) {
+                state.move.dragging = true;
+                state.move.shapeIndex = idx;
+                state.move.hoveredIndex = idx;
+                state.move.dragStartMouse = { x, y };
+                state.move.shapeSnapshot = deepClone(state.shapes[idx]);
+                canvas.style.cursor = 'grabbing';
+                e.preventDefault();
+            }
+        }
+        return;
+    }
+
+    // Priority 4: Drawing tool
     if (state.anim.running) return;
 
     const color = state.drawing ? state.drawing.color : nextColor();
@@ -593,8 +782,8 @@ function handlePointerDown(e) {
             updateHint('Click to add points. Double-click or click the first point to close.');
         } else {
             const pts = state.drawing.pts;
-            // Check if clicking near first point to close
-            if (pts.length >= 3 && Math.hypot(x - pts[0].x, y - pts[0].y) <= CONFIG.polygonCloseRadius) {
+            const closeR = CONFIG.polygonCloseRadius / camera.scale;
+            if (pts.length >= 3 && Math.hypot(x - pts[0].x, y - pts[0].y) <= closeR) {
                 commitShape({ type: 'polygon', pts: pts.slice(), color: state.drawing.color });
                 closePolygonBtn.hidden = true;
             } else {
@@ -607,8 +796,18 @@ function handlePointerDown(e) {
 }
 
 function handlePointerMove(e) {
-    const { x, y } = getPointerPos(e);
+    const screen = getPointerPos(e);
+    const { x, y } = screenToWorld(screen.x, screen.y);
     state.cursorPos = { x, y };
+
+    // Pan
+    if (isPanning) {
+        camera.x = panStart.cx + (e.clientX - panStart.sx);
+        camera.y = panStart.cy + (e.clientY - panStart.sy);
+        dirty = true;
+        e.preventDefault();
+        return;
+    }
 
     if (state.mirror.draggingEndpoint) {
         if (state.mirror.draggingEndpoint === 'p1') {
@@ -637,14 +836,31 @@ function handlePointerMove(e) {
         return;
     }
 
+    if (state.move.dragging) {
+        const { dragStartMouse, shapeSnapshot, shapeIndex } = state.move;
+        moveShape(state.shapes[shapeIndex], shapeSnapshot, x - dragStartMouse.x, y - dragStartMouse.y);
+        dirty = true;
+        e.preventDefault();
+        return;
+    }
+
     // Update cursor style based on hover
-    const ep = hitTestMirrorEndpoint(x, y);
-    if (ep) {
+    if (spaceDown) {
         canvas.style.cursor = 'grab';
-    } else if (hitTestMirrorLine(x, y)) {
-        canvas.style.cursor = 'move';
+    } else if (state.tool === 'move') {
+        const idx = hitTestShape(x, y);
+        state.move.hoveredIndex = idx;
+        canvas.style.cursor = idx !== -1 ? 'grab' : 'default';
+        dirty = true;
     } else {
-        canvas.style.cursor = 'crosshair';
+        const ep = hitTestMirrorEndpoint(x, y);
+        if (ep) {
+            canvas.style.cursor = 'grab';
+        } else if (hitTestMirrorLine(x, y)) {
+            canvas.style.cursor = 'move';
+        } else {
+            canvas.style.cursor = 'crosshair';
+        }
     }
 
     // Update in-progress shape preview
@@ -657,14 +873,29 @@ function handlePointerMove(e) {
 }
 
 function handlePointerUp(e) {
-    const { x, y } = getPointerPos(e);
+    if (isPanning) {
+        isPanning = false;
+        panStart = null;
+        canvas.style.cursor = defaultCursor();
+        dirty = true;
+        return;
+    }
 
     if (state.mirror.draggingEndpoint || state.mirror.draggingLine) {
         state.mirror.draggingEndpoint = null;
         state.mirror.draggingLine = false;
         state.mirror.dragStartMouse = null;
         state.mirror.dragStartLine = null;
-        canvas.style.cursor = 'crosshair';
+        canvas.style.cursor = defaultCursor();
+        dirty = true;
+        return;
+    }
+
+    if (state.move.dragging) {
+        state.move.dragging = false;
+        state.move.dragStartMouse = null;
+        state.move.shapeSnapshot = null;
+        canvas.style.cursor = defaultCursor();
         dirty = true;
         return;
     }
@@ -699,20 +930,91 @@ function handlePointerUp(e) {
 
 function handlePointerLeave() {
     state.cursorPos = null;
+    isPanning = false;
+    panStart = null;
     if (state.mirror.draggingEndpoint || state.mirror.draggingLine) {
         state.mirror.draggingEndpoint = null;
         state.mirror.draggingLine = false;
         state.mirror.dragStartMouse = null;
         state.mirror.dragStartLine = null;
     }
+    if (state.move.dragging) {
+        state.move.dragging = false;
+        state.move.dragStartMouse = null;
+        state.move.shapeSnapshot = null;
+    }
+    state.move.hoveredIndex = -1;
     dirty = true;
 }
 
 function handleDblClick(e) {
+    if (spaceDown) return; // ignore double-click when panning
     if (state.tool === 'polygon' && state.drawing && state.drawing.pts.length >= 3) {
         commitShape({ type: 'polygon', pts: state.drawing.pts.slice(), color: state.drawing.color });
         closePolygonBtn.hidden = true;
     }
+}
+
+// --- Zoom ---
+
+function applyZoom(sx, sy, factor) {
+    const newScale = Math.max(0.05, Math.min(20, camera.scale * factor));
+    camera.x = sx - (sx - camera.x) * (newScale / camera.scale);
+    camera.y = sy - (sy - camera.y) * (newScale / camera.scale);
+    camera.scale = newScale;
+    dirty = true;
+}
+
+function handleWheel(e) {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const sx = e.clientX - rect.left;
+    const sy = e.clientY - rect.top;
+    const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+    applyZoom(sx, sy, factor);
+}
+
+// --- Touch Handlers ---
+
+function handleTouchStart(e) {
+    if (e.touches.length === 2) {
+        const rect = canvas.getBoundingClientRect();
+        const t0 = e.touches[0], t1 = e.touches[1];
+        const dist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+        const midX = (t0.clientX + t1.clientX) / 2 - rect.left;
+        const midY = (t0.clientY + t1.clientY) / 2 - rect.top;
+        pinchState = { dist, midX, midY, cx: camera.x, cy: camera.y, cs: camera.scale };
+        e.preventDefault();
+        return;
+    }
+    handlePointerDown(e);
+}
+
+function handleTouchMove(e) {
+    if (e.touches.length === 2 && pinchState) {
+        const rect = canvas.getBoundingClientRect();
+        const t0 = e.touches[0], t1 = e.touches[1];
+        const dist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+        const midX = (t0.clientX + t1.clientX) / 2 - rect.left;
+        const midY = (t0.clientY + t1.clientY) / 2 - rect.top;
+
+        const scaleChange = dist / pinchState.dist;
+        const newScale = Math.max(0.05, Math.min(20, pinchState.cs * scaleChange));
+        const worldMidX = (pinchState.midX - pinchState.cx) / pinchState.cs;
+        const worldMidY = (pinchState.midY - pinchState.cy) / pinchState.cs;
+        camera.scale = newScale;
+        camera.x = midX - worldMidX * newScale;
+        camera.y = midY - worldMidY * newScale;
+        dirty = true;
+        e.preventDefault();
+        return;
+    }
+    handlePointerMove(e);
+}
+
+function handleTouchEnd(e) {
+    if (e.touches.length < 2) pinchState = null;
+    handlePointerUp(e);
 }
 
 // --- Resize ---
@@ -737,23 +1039,44 @@ function init() {
     canvas.addEventListener('mouseup', handlePointerUp);
     canvas.addEventListener('mouseleave', handlePointerLeave);
     canvas.addEventListener('dblclick', handleDblClick);
+    canvas.addEventListener('wheel', handleWheel, { passive: false });
+    canvas.addEventListener('contextmenu', e => e.preventDefault()); // suppress right-click menu
 
-    canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
-    canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
-    canvas.addEventListener('touchend', handlePointerUp);
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd);
+
+    // Keyboard — Space to pan
+    window.addEventListener('keydown', e => {
+        if (e.code === 'Space' && !e.repeat && document.activeElement === document.body) {
+            spaceDown = true;
+            canvas.style.cursor = 'grab';
+            e.preventDefault();
+        }
+    });
+    window.addEventListener('keyup', e => {
+        if (e.code === 'Space') {
+            spaceDown = false;
+            if (!isPanning) canvas.style.cursor = defaultCursor();
+        }
+    });
 
     // Tool buttons
     toolBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             state.tool = btn.dataset.tool;
             state.drawing = null;
+            state.move.hoveredIndex = -1;
+            state.move.dragging = false;
             closePolygonBtn.hidden = true;
             updateActiveToolBtn(state.tool);
+            canvas.style.cursor = defaultCursor();
             const hints = {
                 circle: 'Click and drag to draw a circle.',
                 rect: 'Click and drag to draw a rectangle.',
                 triangle: 'Click 3 points to draw a triangle.',
-                polygon: 'Click to add points. Double-click or click the first point to close.'
+                polygon: 'Click to add points. Double-click or click the first point to close.',
+                move: 'Click a shape to select and drag it.'
             };
             updateHint(hints[state.tool]);
             dirty = true;
@@ -769,6 +1092,9 @@ function init() {
     reflectBtn.addEventListener('click', startReflection);
     clearBtn.addEventListener('click', clearAll);
     closePolygonBtn.addEventListener('click', tryClosePolygon);
+    preserveBothCb.addEventListener('change', () => {
+        state.preserveBoth = preserveBothCb.checked;
+    });
 
     updateHint('Click and drag to draw a circle.');
     requestAnimationFrame(loop);
