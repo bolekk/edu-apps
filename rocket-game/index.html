@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Rocket</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="game-container">
+        <!-- Background canvas for stars -->
+        <canvas id="bgCanvas"></canvas>
+        <!-- Main game canvas -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- HUD Layer -->
+        <div id="hud">
+            <div class="hud-item score-container">
+                <span class="label">SCORE</span>
+                <span id="score" class="value">0</span>
+            </div>
+            <div class="hud-item lives-container">
+                <span class="label">LIVES</span>
+                <span id="lives" class="value">5</span>
+            </div>
+        </div>
+
+        <!-- Overlays -->
+        <div id="start-screen" class="overlay active">
+            <h1>SPACE ROCKET</h1>
+            <p>Use LEFT/RIGHT arrows to steer.</p>
+            <p>Use UP arrow or SPACE to thrust.</p>
+            <p>Collect diamonds 💎. Avoid asteroids 🪨.</p>
+            <div class="difficulty-buttons">
+                <button id="start-easy-btn" class="glow-on-hover">EASY MODE</button>
+                <button id="start-hard-btn" class="glow-on-hover">HARD MODE</button>
+            </div>
+            <a href="../index.html" class="back-link">Back to Dashboard</a>
+        </div>
+
+        <div id="game-over-screen" class="overlay">
+            <h1>MISSION FAILED</h1>
+            <div class="final-score">Final Score: <span id="final-score-val">0</span></div>
+            <div class="difficulty-buttons">
+                <button id="restart-easy-btn" class="glow-on-hover">RESTART (EASY)</button>
+                <button id="restart-hard-btn" class="glow-on-hover">RESTART (HARD)</button>
+            </div>
+            <a href="../index.html" class="back-link">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

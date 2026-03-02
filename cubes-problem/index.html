@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubes Problem - 3D Visualization</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Load Three.js globals -->
+    <script src="https://unpkg.com/three@0.147.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+
+<body>
+    <a href="../index.html" class="home-link">← Home</a>
+
+    <div id="ui-container">
+        <div class="problem-box">
+            <h2>Problem Statement</h2>
+            <p>Two rubber bands are placed around a stack of cubes.</p>
+            <p><strong>How many cubes are not touching a rubber band?</strong></p>
+
+            <div class="options">
+                <button class="option-btn" data-value="6">(A) 6</button>
+                <button class="option-btn" data-value="8">(B) 8</button>
+                <button class="option-btn" data-value="9">(C) 9</button>
+                <button class="option-btn" data-value="10">(D) 10</button>
+                <button class="option-btn" data-value="12">(E) 12</button>
+            </div>
+
+            <div id="feedback" class="hidden"></div>
+
+            <div class="controls">
+                <button id="btn-highlight-touched">Highlight Touched Cubes</button>
+                <button id="btn-highlight-untouched">Highlight Answer (Untouched)</button>
+                <button id="btn-reset">Reset View</button>
+            </div>
+
+            <p class="instruction">Drag to rotate • Scroll to zoom</p>
+        </div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Tetris Master</title>
+    <meta name="description"
+        content="A premium, neon-styled Tetris game built with modern web technologies. Experience classic gameplay with a futuristic design.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <a href="../index.html" class="home-link">
+                <!-- Simple back arrow icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5" />
+                    <path d="M12 19l-7-7 7-7" />
+                </svg>
+                Home
+            </a>
+            <h1>NEON TETRIS</h1>
+        </header>
+
+        <main class="game-area">
+            <div class="left-panel">
+                <div class="panel-box hold-piece">
+                    <h2>HOLD</h2>
+                    <canvas id="hold-canvas" width="100" height="100"></canvas>
+                    <div class="key-hint">C</div>
+                </div>
+
+                <div class="panel-box game-stats">
+                    <div class="stat-item">
+                        <span class="label">SCORE</span>
+                        <span class="value" id="score">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">LEVEL</span>
+                        <span class="value" id="level">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">LINES</span>
+                        <span class="value" id="lines">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-board-container">
+                <canvas id="game-canvas" width="300" height="600"></canvas>
+                <div id="game-overlay" class="overlay">
+                    <div class="overlay-content">
+                        <h2 id="overlay-title">Paused</h2>
+                        <p id="overlay-message">Press ESC to Resume</p>
+                        <button id="start-btn" class="primary-btn">Start Game</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="panel-box next-piece">
+                    <h2>NEXT</h2>
+                    <canvas id="next-canvas" width="100" height="300"></canvas>
+                </div>
+
+                <div class="panel-box controls-info">
+                    <h2>CONTROLS</h2>
+                    <div class="control-row"><span class="key">←</span> <span class="key">→</span> Move</div>
+                    <div class="control-row"><span class="key">↑</span> Rotate</div>
+                    <div class="control-row"><span class="key">↓</span> Soft Drop</div>
+                    <div class="control-row"><span class="key">Space</span> Hard Drop</div>
+                    <div class="control-row"><span class="key">C</span> Hold</div>
+                    <div class="control-row"><span class="key">Esc</span> Pause</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
