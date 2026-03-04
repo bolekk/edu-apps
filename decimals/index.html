@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decimal Addition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <aside id="ui-panel">
+        <a href="../index.html" class="back-link">← Home</a>
+        <h1 class="app-title">Decimal Addition</h1>
+
+        <div class="section">
+            <div class="section-label">Starting Number</div>
+            <div class="number-control">
+                <button class="adjust-btn" id="start-down">−</button>
+                <span class="number-display" id="start-display">1.3</span>
+                <button class="adjust-btn" id="start-up">+</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-label">Add</div>
+            <div class="number-control">
+                <button class="adjust-btn" id="add-down">−</button>
+                <span class="number-display" id="add-display">0.8</span>
+                <button class="adjust-btn" id="add-up">+</button>
+            </div>
+        </div>
+
+        <div class="section sum-section">
+            <span class="sum-equals">=</span>
+            <span class="sum-value" id="sum-display">2.1</span>
+        </div>
+
+        <div class="section legend">
+            <div class="legend-item">
+                <div class="legend-swatch primary"></div>
+                <span id="legend-start">1.3</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-swatch secondary"></div>
+                <span id="legend-add">+ 0.8</span>
+            </div>
+        </div>
+    </aside>
+
+    <main id="blocks-area">
+        <div id="groups-container"></div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

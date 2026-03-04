@@ -1,0 +1,212 @@
+:root {
+    --bg: #0f172a;
+    --panel-bg: rgba(30, 41, 59, 0.85);
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --accent: #3b82f6;
+    --primary: #3b82f6;
+    --secondary: #f59e0b;
+    --block-empty-bg: rgba(255, 255, 255, 0.04);
+    --block-empty-border: rgba(255, 255, 255, 0.12);
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg);
+    color: var(--text-primary);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ── Panel ── */
+#ui-panel {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid var(--panel-border);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px 20px;
+    overflow-y: auto;
+}
+
+.back-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+}
+.back-link:hover { color: var(--text-primary); }
+
+.app-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.section-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+/* ── Number controls ── */
+.number-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.adjust-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--panel-border);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.1s;
+    user-select: none;
+}
+.adjust-btn:hover { background: rgba(255, 255, 255, 0.12); }
+.adjust-btn:active { transform: scale(0.92); }
+
+.number-display {
+    flex: 1;
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 60px;
+}
+
+/* ── Sum ── */
+.sum-section {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 12px 0;
+    border-top: 1px solid var(--panel-border);
+    border-bottom: 1px solid var(--panel-border);
+}
+.sum-equals {
+    font-size: 1.4rem;
+    color: var(--text-secondary);
+}
+.sum-value {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ── Legend ── */
+.legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+.legend-swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+.legend-swatch.primary { background: var(--primary); }
+.legend-swatch.secondary { background: var(--secondary); }
+
+/* ── Main area ── */
+#blocks-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    overflow: auto;
+}
+
+#groups-container {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: flex-end;
+}
+
+/* ── Block groups ── */
+.block-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+}
+
+.blocks-stack {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 3px;
+    height: 387px; /* 10 × 36 + 9 × 3 */
+    justify-content: flex-start;
+}
+
+.block {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.block.primary {
+    background: var(--primary);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.35);
+}
+
+.block.secondary {
+    background: var(--secondary);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.35);
+}
+
+.block.empty {
+    background: var(--block-empty-bg);
+    border: 1px dashed var(--block-empty-border);
+    box-shadow: none;
+}
+
+.group-label {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+}
+.group-label.full {
+    color: var(--text-secondary);
+}
+.group-label.decimal {
+    color: var(--text-primary);
+}
