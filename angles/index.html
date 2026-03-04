@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angles Explorer</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div id="ui-panel">
+        <a href="../index.html" class="back-link">← Home</a>
+        <h1>Angles Explorer</h1>
+        <hr>
+
+        <div class="section-label">Total Angle</div>
+        <div id="total-display">
+            <span id="total-value">60</span><span class="degree-symbol">°</span>
+        </div>
+        <div id="special-msg"></div>
+
+        <hr>
+
+        <div class="section-label">Angles</div>
+        <div class="btn-group">
+            <button id="add-btn" class="text-btn primary">+ Add Angle</button>
+            <button id="remove-btn" class="text-btn">− Remove</button>
+        </div>
+
+        <hr>
+
+        <div class="hint" id="hint-text">Drag the ray tip to change the angle.</div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
