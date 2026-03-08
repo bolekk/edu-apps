@@ -41,7 +41,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 4rem;
+            margin-bottom: 3rem;
             animation: fadeInDown 0.8s ease-out;
         }
 
@@ -60,101 +60,76 @@
             font-size: 1.2rem;
         }
 
-        .grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 4rem;
+        .categories {
             width: 100%;
             max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        .category {
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        .category:nth-child(1) {
+            animation-delay: 0.1s;
+            --category-color: #f59e0b;
+        }
+
+        .category:nth-child(2) {
+            animation-delay: 0.2s;
+            --category-color: #60a5fa;
+        }
+
+        .category:nth-child(3) {
+            animation-delay: 0.3s;
+            --category-color: #f43f5e;
+        }
+
+        .category-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--category-color);
+            margin: 0 0 1.25rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 280px);
+            gap: 1.5rem;
         }
 
         .card {
-            flex: 1 1 300px;
-            max-width: 380px;
+            width: 280px;
             background-color: var(--card-bg);
             border-radius: 1rem;
-            padding: 2rem;
+            padding: 1.75rem;
             text-decoration: none;
             color: inherit;
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             box-shadow: var(--card-shadow);
             border: 1px solid transparent;
+            border-top: 4px solid var(--card-color);
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
-            animation: fadeInUp 0.8s ease-out backwards;
-        }
-
-        .card:nth-child(1) {
-            animation-delay: 0.1s;
-            border-top: 4px solid #f43f5e;
-        }
-
-        .card:nth-child(2) {
-            animation-delay: 0.2s;
-            border-top: 4px solid #10b981;
-        }
-
-        .card:nth-child(3) {
-            animation-delay: 0.3s;
-            border-top: 4px solid #3b82f6;
-        }
-
-        .card:nth-child(4) {
-            animation-delay: 0.4s;
-            border-top: 4px solid #8b5cf6;
-        }
-
-        .card:nth-child(5) {
-            animation-delay: 0.5s;
-            border-top: 4px solid #f59e0b;
-        }
-
-        .card:nth-child(6) {
-            animation-delay: 0.6s;
-            border-top: 4px solid #116590;
-        }
-
-        .card:nth-child(7) {
-            animation-delay: 0.7s;
-            border-top: 4px solid #be185d;
-        }
-
-        .card:nth-child(8) {
-            animation-delay: 0.8s;
-            border-top: 4px solid #06b6d4;
-        }
-
-        .card:nth-child(9) {
-            animation-delay: 0.9s;
-            border-top: 4px solid #ec4899;
-        }
-
-        .card:nth-child(10) {
-            animation-delay: 1.0s;
-            border-top: 4px solid #14b8a6;
-        }
-
-        .card:nth-child(11) {
-            animation-delay: 1.1s;
-            border-top: 4px solid #a78bfa;
-        }
-
-        .card:nth-child(12) {
-            animation-delay: 1.2s;
-            border-top: 4px solid #f97316;
         }
 
         .card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-6px);
             box-shadow: var(--card-hover-shadow);
             border-color: rgba(255, 255, 255, 0.1);
+            border-top-color: var(--card-color);
         }
 
         .card h2 {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             margin-top: 0;
             margin-bottom: 0.5rem;
             color: var(--text-primary);
@@ -164,12 +139,13 @@
             color: var(--text-secondary);
             line-height: 1.6;
             flex-grow: 1;
+            margin: 0;
         }
 
         .card-footer {
-            margin-top: 1.5rem;
+            margin-top: 1.25rem;
             font-weight: 600;
-            color: var(--accent-primary);
+            color: var(--card-color);
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -212,7 +188,6 @@
             }
         }
 
-        /* Responsive adjustments */
         @media (max-width: 600px) {
             h1 {
                 font-size: 2.5rem;
@@ -220,6 +195,10 @@
 
             .grid {
                 grid-template-columns: 1fr;
+            }
+
+            .card {
+                width: 100%;
             }
         }
     </style>
@@ -232,107 +211,94 @@
         <p class="subtitle">Explore our collection of interactive learning tools</p>
     </header>
 
-    <div class="grid">
-        <a href="./coordinates/index.html" class="card">
-            <h2>Coordinates</h2>
-            <p>Master the Cartesian plane with this interactive tool. Draw inequalities, visualize regions, and
-                understand linear equations.</p>
-            <div class="card-footer">
-                Launch App <span class="arrow">→</span>
-            </div>
-        </a>
+    <div class="categories">
 
-        <a href="./multiplication/index.html" class="card">
-            <h2>Multiplication Master</h2>
-            <p>Practice your times tables in a fun, gamified environment. Track your progress and achieve mastery.</p>
-            <div class="card-footer">
-                Launch App <span class="arrow">→</span>
-            </div>
-        </a>
+        <section class="category">
+            <h3 class="category-title">Numbers</h3>
+            <div class="grid">
+                <a href="./multiplication/index.html" class="card" style="--card-color: #10b981">
+                    <h2>Multiplication Master</h2>
+                    <p>Practice your times tables in a fun, gamified environment. Track your progress and achieve mastery.</p>
+                    <div class="card-footer">Launch App <span class="arrow">→</span></div>
+                </a>
 
-        <a href="./time-diff/index.html" class="card">
-            <h2>Time Difference</h2>
-            <p>Learn to calculate the difference between two timestamps. Test your skills across varying difficulty
-                levels.</p>
-            <div class="card-footer">
-                Launch App <span class="arrow">→</span>
-            </div>
-        </a>
+                <a href="./time-diff/index.html" class="card" style="--card-color: #3b82f6">
+                    <h2>Time Difference</h2>
+                    <p>Learn to calculate the difference between two timestamps. Test your skills across varying difficulty levels.</p>
+                    <div class="card-footer">Launch App <span class="arrow">→</span></div>
+                </a>
 
-        <a href="./cubes/index.html" class="card">
-            <h2>Cubes Builder</h2>
-            <p>Build and visualize 3D structures with colorful cubes. Create, rotate, and explore in a 3D environment.
-            </p>
-            <div class="card-footer">
-                Launch App <span class="arrow">→</span>
-            </div>
-        </a>
+                <a href="./equations-balance/index.html" class="card" style="--card-color: #116590">
+                    <h2>Equations Balance</h2>
+                    <p>Solve equations by balancing the scale! Discover the mystery weight with logic and physics.</p>
+                    <div class="card-footer">Launch App <span class="arrow">→</span></div>
+                </a>
 
-        <a href="./cubenets/index.html" class="card">
-            <h2>Cube Nets</h2>
-            <p>Explore 11 different net shapes and watch them fold into 3D cubes. Interactive visualization of geometry
-                concepts.</p>
-            <div class="card-footer">
-                Launch App <span class="arrow">→</span>
+                <a href="./decimals/index.html" class="card" style="--card-color: #a78bfa">
+                    <h2>Decimal Addition</h2>
+                    <p>Visualize decimal numbers as stacked blocks grouped into whole units. Add two numbers and watch how blocks fill and carry across groups.</p>
+                    <div class="card-footer">Launch App <span class="arrow">→</span></div>
+                </a>
             </div>
-        </a>
+        </section>
 
-        <a href="./equations-balance/index.html" class="card">
-            <h2>Equations Balance</h2>
-            <p>Solve equations by balancing the scale! Discover the mystery weight with logic and physics.</p>
-            <div class="card-footer">
-                Launch App <span class="arrow">→</span>
-            </div>
-        </a>
+        <section class="category">
+            <h3 class="category-title">Geometry and 3D</h3>
+            <div class="grid">
+                <a href="./coordinates/index.html" class="card" style="--card-color: #f43f5e">
+                    <h2>Coordinates</h2>
+                    <p>Master the Cartesian plane with this interactive tool. Draw inequalities, visualize regions, and understand linear equations.</p>
+                    <div class="card-footer">Launch App <span class="arrow">→</span></div>
+                </a>
 
-        <a href="./cubes-problem/index.html" class="card">
-            <h2>Cubes Problem</h2>
-            <p>Visualize and solve a 3D geometry problem involving rubber bands on a stack of cubes.</p>
-            <div class="card-footer">
-                Launch App <span class="arrow">→</span>
-            </div>
-        </a>
+                <a href="./cubes/index.html" class="card" style="--card-color: #8b5cf6">
+                    <h2>Cubes Builder</h2>
+                    <p>Build and visualize 3D structures with colorful cubes. Create, rotate, and explore in a 3D environment.</p>
+                    <div class="card-footer">Launch App <span class="arrow">→</span></div>
+                </a>
 
-        <a href="./tetris/index.html" class="card">
-            <h2>Neon Tetris</h2>
-            <p>Experience the classic block-stacking game with a modern neon aesthetic and smooth gameplay.</p>
-            <div class="card-footer">
-                Launch App <span class="arrow">→</span>
-            </div>
-        </a>
+                <a href="./cubenets/index.html" class="card" style="--card-color: #f59e0b">
+                    <h2>Cube Nets</h2>
+                    <p>Explore 11 different net shapes and watch them fold into 3D cubes. Interactive visualization of geometry concepts.</p>
+                    <div class="card-footer">Launch App <span class="arrow">→</span></div>
+                </a>
 
-        <a href="./rocket-game/index.html" class="card">
-            <h2>Space Rocket</h2>
-            <p>Fly a rocket ship through space, collect diamonds for points and avoid dangerous asteroids to survive!
-            </p>
-            <div class="card-footer">
-                Launch App <span class="arrow">→</span>
-            </div>
-        </a>
+                <a href="./cubes-problem/index.html" class="card" style="--card-color: #be185d">
+                    <h2>Cubes Problem</h2>
+                    <p>Visualize and solve a 3D geometry problem involving rubber bands on a stack of cubes.</p>
+                    <div class="card-footer">Launch App <span class="arrow">→</span></div>
+                </a>
 
-        <a href="./symmetry/index.html" class="card">
-            <h2>Symmetry Explorer</h2>
-            <p>Draw shapes and discover the magic of reflection symmetry. Drag the mirror line to any angle, then watch your shapes fold across it with a satisfying animation.</p>
-            <div class="card-footer">
-                Launch App <span class="arrow">→</span>
-            </div>
-        </a>
+                <a href="./symmetry/index.html" class="card" style="--card-color: #14b8a6">
+                    <h2>Symmetry Explorer</h2>
+                    <p>Draw shapes and discover the magic of reflection symmetry. Drag the mirror line to any angle, then watch your shapes fold across it with a satisfying animation.</p>
+                    <div class="card-footer">Launch App <span class="arrow">→</span></div>
+                </a>
 
-        <a href="./decimals/index.html" class="card">
-            <h2>Decimal Addition</h2>
-            <p>Visualize decimal numbers as stacked blocks grouped into whole units. Add two numbers and watch how blocks fill and carry across groups.</p>
-            <div class="card-footer">
-                Launch App <span class="arrow">→</span>
+                <a href="./angles/index.html" class="card" style="--card-color: #f97316">
+                    <h2>Angles Explorer</h2>
+                    <p>Discover how angles work by dragging rays and watching adjacent sectors add up. Build intuition for right angles, straight lines, and more.</p>
+                    <div class="card-footer">Launch App <span class="arrow">→</span></div>
+                </a>
             </div>
-        </a>
+        </section>
 
-        <a href="./angles/index.html" class="card">
-            <h2>Angles Explorer</h2>
-            <p>Discover how angles work by dragging rays and watching adjacent sectors add up. Build intuition for right angles, straight lines, and more.</p>
-            <div class="card-footer">
-                Launch App <span class="arrow">→</span>
+        <section class="category">
+            <h3 class="category-title">Games</h3>
+            <div class="grid">
+                <a href="./tetris/index.html" class="card" style="--card-color: #06b6d4">
+                    <h2>Neon Tetris</h2>
+                    <p>Experience the classic block-stacking game with a modern neon aesthetic and smooth gameplay.</p>
+                    <div class="card-footer">Launch App <span class="arrow">→</span></div>
+                </a>
+
+                <a href="./rocket-game/index.html" class="card" style="--card-color: #ec4899">
+                    <h2>Space Rocket</h2>
+                    <p>Fly a rocket ship through space, collect diamonds for points and avoid dangerous asteroids to survive!</p>
+                    <div class="card-footer">Launch App <span class="arrow">→</span></div>
+                </a>
             </div>
-        </a>
+        </section>
 
     </div>
 
