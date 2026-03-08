@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Left or Right?</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div id="ui-panel">
+        <a href="../index.html" class="back-link">← Home</a>
+        <h1>Left or Right?</h1>
+
+        <div class="difficulty-row">
+            <button class="diff-btn active" data-diff="easy">Easy</button>
+            <button class="diff-btn" data-diff="hard">Hard</button>
+        </div>
+
+        <hr>
+
+        <div class="stats-grid">
+            <div class="stat-row">
+                <span class="stat-label">Left turns</span>
+                <span class="stat-value" id="left-count">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Right turns</span>
+                <span class="stat-value" id="right-count">0</span>
+            </div>
+            <div class="stat-row" id="points-row">
+                <span class="stat-label">Points</span>
+                <span class="stat-value" id="points-count">0</span>
+            </div>
+        </div>
+
+        <hr>
+
+        <div id="answer-buttons" class="btn-group hidden">
+            <button id="left-btn" class="turn-btn left-btn">← Left</button>
+            <button id="right-btn" class="turn-btn right-btn">Right →</button>
+        </div>
+
+        <hr>
+
+        <label class="toggle-label">
+            <input type="checkbox" id="arrow-toggle">
+            <span>Show forward arrow</span>
+        </label>
+
+        <button id="new-path-btn" class="text-btn primary">New Path</button>
+
+        <hr>
+
+        <div class="hint" id="hint-text">Walk the path and answer at each turn!</div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
