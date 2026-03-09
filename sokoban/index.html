@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sokoban</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div id="ui-panel">
+        <a href="../index.html" class="back-link">← Home</a>
+        <h1>Sokoban</h1>
+        <hr>
+
+        <div class="section-label">Level</div>
+        <select id="level-select"></select>
+
+        <hr>
+
+        <div class="section-label">Moves</div>
+        <div id="moves-display">0</div>
+
+        <hr>
+
+        <div class="btn-group">
+            <button id="restart-btn" class="text-btn primary">Restart</button>
+            <button id="undo-btn" class="text-btn">Undo</button>
+        </div>
+
+        <hr>
+
+        <div class="hint">
+            Arrow keys or WASD to move<br>
+            U &nbsp;— undo &nbsp;&nbsp; R — restart<br>
+            Push all boxes onto the gold goals
+        </div>
+    </div>
+
+    <div id="win-overlay" class="hidden">
+        <div class="win-box">
+            <div class="win-emoji">&#x1F389;</div>
+            <div class="win-title">Solved!</div>
+            <div id="win-moves"></div>
+            <button id="next-btn" class="text-btn primary">Next Level →</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
