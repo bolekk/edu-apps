@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Division with Hops</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div id="ui-panel">
+        <a href="../index.html" class="back-link">← Home</a>
+        <h1>Division with Hops</h1>
+
+        <hr>
+
+        <div class="section-label">Dividend (total)</div>
+        <div class="number-control">
+            <button class="adjust-btn" id="dividend-down">−</button>
+            <div class="number-display" id="dividend-display">12</div>
+            <button class="adjust-btn" id="dividend-up">+</button>
+        </div>
+
+        <div class="section-label" style="margin-top: 4px">Divisor (hop size)</div>
+        <div class="number-control">
+            <button class="adjust-btn" id="divisor-down">−</button>
+            <div class="number-display" id="divisor-display">3</div>
+            <button class="adjust-btn" id="divisor-up">+</button>
+        </div>
+
+        <hr>
+
+        <label class="toggle-label">
+            <input type="checkbox" id="remainder-toggle">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span>Show Remainders</span>
+        </label>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

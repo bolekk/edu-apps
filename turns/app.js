@@ -42,6 +42,7 @@ let points = 0;
 let showArrow = false;
 let difficulty = 'easy'; // 'easy' | 'hard'
 let sparkles = [];
+let feedbackGemPos = null;
 
 // ─── Path Generation ──────────────────────────────────────────────────────────
 function generatePath() {
@@ -158,6 +159,7 @@ function generatePath() {
     points = 0;
     sparkles = [];
     feedbackTimer = 0;
+    feedbackGemPos = null;
 
     updateUI();
     updateAngle();
@@ -244,12 +246,14 @@ function handleAnswer(answer) {
         bounty.answered = true;
         leftBtn.disabled = true;
         rightBtn.disabled = true;
+        feedbackGemPos = { x: bounty.x, y: bounty.y };
 
         if (answer === correct) {
             feedbackCorrect = true;
             bounty.collected = true;
             points += 10;
             spawnSparkles(bounty.x, bounty.y);
+            spawnSparkles(bounty.x, bounty.y); // double sparkles for gem collect
         } else {
             feedbackCorrect = false;
             bounty.wrong = true;
@@ -257,7 +261,7 @@ function handleAnswer(answer) {
 
         feedbackBounty = true;
         state = 'feedback_bounty';
-        feedbackTimer = 0.7;
+        feedbackTimer = 1.1;
         updateUI();
     }
 }
@@ -404,6 +408,7 @@ function draw() {
     if (waypoints.length < 2) return;
 
     drawPath();
+    drawStartMarker();
     drawFinishLine();
     drawWaypointDots();
     drawBounties();
@@ -425,6 +430,29 @@ function drawPath() {
         ctx.lineTo(waypoints[i].x, waypoints[i].y);
     }
     ctx.stroke();
+    ctx.restore();
+}
+
+function drawStartMarker() {
+    const sp = waypoints[0];
+    ctx.save();
+    // outer glow ring
+    ctx.beginPath();
+    ctx.arc(sp.x, sp.y, 18, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(74,222,128,0.35)';
+    ctx.lineWidth = 6;
+    ctx.stroke();
+    // inner ring
+    ctx.beginPath();
+    ctx.arc(sp.x, sp.y, 12, 0, Math.PI * 2);
+    ctx.strokeStyle = '#4ade80';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    // label
+    ctx.font = 'bold 12px Inter, sans-serif';
+    ctx.fillStyle = '#4ade80';
+    ctx.textAlign = 'center';
+    ctx.fillText('START', sp.x, sp.y - 24);
     ctx.restore();
 }
 
@@ -630,23 +658,48 @@ function drawQuestionBanner() {
 function drawFeedbackOverlay() {
     if (state !== 'feedback_turn' && state !== 'feedback_bounty') return;
 
-    const x = character.x;
-    const y = character.y;
     const alpha = Math.min(1, feedbackTimer * 2.5);
-
     ctx.save();
     ctx.globalAlpha = alpha;
-    ctx.font = 'bold 28px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
 
-    if (feedbackCorrect) {
-        ctx.fillStyle = '#4ade80';
-        ctx.fillText(feedbackBounty ? '+10 ✓' : '✓', x, y - 36);
+    if (feedbackBounty && feedbackGemPos) {
+        // Large flash circle at gem position
+        const gx = feedbackGemPos.x;
+        const gy = feedbackGemPos.y;
+        const flashR = 60;
+        const color = feedbackCorrect ? '#4ade80' : '#f87171';
+        const grd = ctx.createRadialGradient(gx, gy, 0, gx, gy, flashR);
+        grd.addColorStop(0, feedbackCorrect ? 'rgba(74,222,128,0.55)' : 'rgba(248,113,113,0.55)');
+        grd.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(gx, gy, flashR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Big label above gem
+        ctx.font = 'bold 44px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 18;
+        ctx.fillText(feedbackCorrect ? '+10' : 'MISS!', gx, gy - 56);
+        ctx.shadowBlur = 0;
+
+        // Icon below label
+        ctx.font = 'bold 32px Inter, sans-serif';
+        ctx.fillText(feedbackCorrect ? '✓' : '✗', gx, gy - 18);
     } else {
-        ctx.fillStyle = '#f87171';
-        ctx.fillText('✗', x, y - 36);
+        // Turn feedback — near character
+        const x = character.x;
+        const y = character.y;
+        ctx.font = 'bold 28px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = feedbackCorrect ? '#4ade80' : '#f87171';
+        ctx.fillText(feedbackCorrect ? '✓' : '✗', x, y - 36);
     }
+
     ctx.restore();
 }
 

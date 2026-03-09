@@ -35,7 +35,7 @@ const rocket = {
     rotationSpeed: 0,
     isThrusting: false,
     radius: 15,
-    thrustPower: 0.015,
+    thrustPower: 0.03,
     color: '#00ffff',
     invulnerableTimer: 0
 };
