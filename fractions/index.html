@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraction Addition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <aside id="ui-panel">
+        <a href="../index.html" class="back-link">← Home</a>
+        <h1 class="app-title">Fraction Addition</h1>
+
+        <div class="section">
+            <div class="section-label">First Fraction</div>
+            <div class="fraction-control">
+                <div class="fraction-row">
+                    <button class="adjust-btn" id="an-down">−</button>
+                    <span class="fraction-number" id="an-display">1</span>
+                    <button class="adjust-btn" id="an-up">+</button>
+                </div>
+                <div class="fraction-bar"></div>
+                <div class="fraction-row">
+                    <button class="adjust-btn" id="ad-down">−</button>
+                    <span class="fraction-number" id="ad-display">3</span>
+                    <button class="adjust-btn" id="ad-up">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-label">Second Fraction</div>
+            <div class="fraction-control">
+                <div class="fraction-row">
+                    <button class="adjust-btn" id="bn-down">−</button>
+                    <span class="fraction-number" id="bn-display">1</span>
+                    <button class="adjust-btn" id="bn-up">+</button>
+                </div>
+                <div class="fraction-bar"></div>
+                <div class="fraction-row">
+                    <button class="adjust-btn" id="bd-down">−</button>
+                    <span class="fraction-number" id="bd-display">4</span>
+                    <button class="adjust-btn" id="bd-up">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section sum-section">
+            <div class="sum-label">Sum</div>
+            <div class="sum-formula" id="sum-formula">1/3 + 1/4 = 7/12</div>
+        </div>
+
+        <button class="lcd-btn" id="lcd-btn">Show common denominator</button>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-swatch" style="background:#f97316"></div>
+                <span id="legend-a">1/3</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-swatch" style="background:#38bdf8"></div>
+                <span id="legend-b">1/4</span>
+            </div>
+        </div>
+    </aside>
+
+    <main id="viz-area">
+        <div id="pizzas-row">
+            <div class="pizza-wrapper">
+                <svg id="pizza-a" viewBox="0 0 200 200"></svg>
+                <div class="pizza-label" id="label-a">1/3</div>
+            </div>
+            <div class="plus-sign">+</div>
+            <div class="pizza-wrapper">
+                <svg id="pizza-b" viewBox="0 0 200 200"></svg>
+                <div class="pizza-label" id="label-b">1/4</div>
+            </div>
+            <div class="plus-sign">=</div>
+            <div class="pizza-wrapper">
+                <svg id="pizza-result" viewBox="0 0 200 200"></svg>
+                <div class="pizza-label" id="label-result">7/12</div>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

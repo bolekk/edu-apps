@@ -1,0 +1,237 @@
+:root {
+    --bg: #0f172a;
+    --panel-bg: #1e293b;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #334155;
+    --btn-bg: #334155;
+    --btn-hover: #475569;
+    --color-a: #f97316;
+    --color-b: #38bdf8;
+    --color-lcd: #a78bfa;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Side panel */
+#ui-panel {
+    width: 240px;
+    min-width: 240px;
+    background: var(--panel-bg);
+    padding: 1.5rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+}
+
+.back-link {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s;
+}
+.back-link:hover { color: var(--text); }
+
+.app-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--color-a);
+}
+
+.section { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+}
+
+/* Fraction control widget */
+.fraction-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+}
+
+.fraction-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.fraction-number {
+    font-size: 1.75rem;
+    font-weight: 600;
+    min-width: 2ch;
+    text-align: center;
+    line-height: 1;
+}
+
+.fraction-bar {
+    width: 4rem;
+    height: 2px;
+    background: var(--text-dim);
+    border-radius: 1px;
+    margin: 0.15rem 0;
+}
+
+.adjust-btn {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: none;
+    background: var(--btn-bg);
+    color: var(--text);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
+.adjust-btn:hover { background: var(--btn-hover); }
+.adjust-btn:active { background: #64748b; }
+
+/* Sum */
+.sum-section { gap: 0.3rem; }
+
+.sum-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+}
+
+.sum-formula {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    text-align: center;
+}
+
+/* LCD button */
+.lcd-btn {
+    background: transparent;
+    border: 2px solid var(--color-lcd);
+    color: var(--color-lcd);
+    border-radius: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.lcd-btn:hover, .lcd-btn.active {
+    background: var(--color-lcd);
+    color: #0f172a;
+}
+
+/* Legend */
+.legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: auto;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+}
+.legend-swatch {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.2rem;
+    flex-shrink: 0;
+}
+
+/* Main viz area */
+#viz-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+#pizzas-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.pizza-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.pizza-wrapper svg {
+    width: min(180px, 28vw);
+    height: min(180px, 28vw);
+    filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5));
+}
+
+.pizza-label {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.03em;
+}
+
+.plus-sign {
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: var(--text-dim);
+    user-select: none;
+}
+
+@media (max-width: 700px) {
+    body { flex-direction: column; }
+    #ui-panel {
+        width: 100%;
+        min-width: unset;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    .app-title { width: 100%; }
+    .legend { flex-direction: row; margin-top: 0; }
+    #pizzas-row { gap: 0.75rem; }
+    .plus-sign { font-size: 1.75rem; }
+}
