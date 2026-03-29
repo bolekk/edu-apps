@@ -1888,17 +1888,22 @@ document.addEventListener('keydown', e => {
         case 'ArrowLeft':  case 'a': case 'A': e.preventDefault(); tryMove(-1, 0); break;
         case 'ArrowRight': case 'd': case 'D': e.preventDefault(); tryMove( 1, 0); break;
         case 'u': case 'U': undo(); break;
-        case 'r': case 'R': loadLevel(state.mapIdx); break;
+        case 'r': case 'R': if (confirm('Restart this level?')) loadLevel(state.mapIdx); break;
     }
 });
 
-document.getElementById('restart-btn').addEventListener('click', () => loadLevel(state.mapIdx));
+document.getElementById('restart-btn').addEventListener('click', () => { if (confirm('Restart this level?')) loadLevel(state.mapIdx); });
 document.getElementById('undo-btn').addEventListener('click', undo);
 document.getElementById('next-btn').addEventListener('click', () => {
     if (state.mapIdx < maps.length - 1) loadLevel(state.mapIdx + 1);
 });
 document.getElementById('level-select').addEventListener('change', e => {
-    loadLevel(parseInt(e.target.value, 10));
+    const idx = parseInt(e.target.value, 10);
+    if (confirm(`Switch to level ${idx + 1}?`)) {
+        loadLevel(idx);
+    } else {
+        e.target.value = String(state.mapIdx);
+    }
 });
 
 function init() {
